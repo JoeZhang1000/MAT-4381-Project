@@ -15,9 +15,22 @@ Linear regression is often used to model relationships between a response variab
 
 # Introduction
 
-To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon}$$
+To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors with each observation, $n$ is the number of observations, and $k$ is the number of parameters. The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have 
+
+$$\boldsymbol{y} = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix} \text{, } \quad X = \begin{bmatrix} 1 & x_{11} & x_{12} & \cdots & x_{1k} \\ 1 & x_{21} & x_{22} & \cdots & x_{2k} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 1 & x_{n1} & x_{n2} & \cdots & x_{nk} \end{bmatrix} \text{, } \quad \boldsymbol{\beta} = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_{k-1} \end{bmatrix} \text{, } \quad \boldsymbol{\epsilon} = \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n \end{bmatrix}$$
+
+The most well-known way is to use the ordinary least squares method to estimate the parameters. The goal of this paper is to compare the ordinary least squares method with the Bayesian method of estimating parameters.
 
 # Ordinary Least Squares Regression Revisited
+
+Consider a multiple linear regression model $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ assume that the random errors have mean 0, variance $\sigma^2$, are uncorrelated, and they follow a normal distribution. In other words, we assume that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$, where $\boldsymbol{0}$ is the zero vector, and $I$ is the identity matrix.
+
+To estimate the coefficients, the following quantity should be minimized: $$S(\boldsymbol{\beta}) = \sum_{i = 1}^{n} \epsilon_i = \boldsymbol{\epsilon}^T\boldsymbol{\epsilon} = (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta})$$
+
+
+
+
+
 
 # Bayesian Linear Regression
 
