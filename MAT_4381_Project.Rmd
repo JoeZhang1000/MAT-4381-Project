@@ -24,3 +24,7 @@ In this paper, we are comparing Bayesian and Frequentist linear regression model
 # Conclusion
 
 # References
+
+https://en.wikipedia.org/wiki/Bayesian_linear_regression
+
+
