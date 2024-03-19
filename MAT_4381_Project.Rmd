@@ -1,0 +1,26 @@
+---
+title: "MAT 4381 Project"
+author: "Joe Zhang and Christian Paravalos"
+date: "Winter 2024"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+In this paper, we are comparing Bayesian and Frequentist linear regression models. 
+
+# Introduction
+
+# Ordinary Least Squares Regression Revisited
+
+# Bayesian Linear Regression
+
+# Application
+
+# Conclusion
+
+# References
