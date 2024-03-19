@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Abstract
 
-Linear regression is often used to model relationships between a response variable and one or more explanatory variables. In traditional settings, the ordinary least squares method is used to estimate the model. In this paper, the focus is to develop a linear model by estimating the model parameters under a Bayesian framework and compare the model against the traditional ordinary least squares model using a dataset.
+Linear regression is often used to model relationships between a response variable and one or more explanatory variables. In traditional settings, the ordinary least squares method is used to estimate the model. In this paper, our goal is to develop a linear model by estimating the model parameters under a Bayesian framework and compare the model against the traditional ordinary least squares model using a dataset. 
 
 # Introduction
 
@@ -23,13 +23,32 @@ The most well-known way is to use the ordinary least squares method to estimate 
 
 # Ordinary Least Squares Regression Revisited
 
+## Estimation of Model Parameters
+
 Consider a multiple linear regression model $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ assume that the random errors have mean 0, variance $\sigma^2$, are uncorrelated, and they follow a normal distribution. In other words, we assume that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$, where $\boldsymbol{0}$ is the zero vector, and $I$ is the identity matrix.
 
 To estimate the coefficients, the following quantity should be minimized: $$S(\boldsymbol{\beta}) = \sum_{i = 1}^{n} \epsilon_i = \boldsymbol{\epsilon}^T\boldsymbol{\epsilon} = (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta})$$
 
+We need to take derivatives of $S(\boldsymbol{\beta})$ with respect to $\boldsymbol{\beta}$. We get that $$\frac{\partial S(\boldsymbol{\beta})}{\partial \boldsymbol{\beta}} = -2X^T\boldsymbol{y} + 2X^TX\boldsymbol{\beta}$$
+
+If we set this equation to 0 and we solve for $\boldsymbol{\beta}$, we get $$X^TX\boldsymbol{\beta} = X^T\boldsymbol{y}$$
+
+If we multiply both sides by the inverse of $X^TX$, assuming that it is invertible, then the least squares estimator of $\boldsymbol{\beta}$ is $$\hat{\boldsymbol{\beta}} = (X^TX)^{-1}X^T\boldsymbol{y}$$
+
+The least squares estimator of $\boldsymbol{\beta}$ has the following properties:
+
+\begin{itemize}
+  \item $\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}$
+  \item $Var[\hat{\boldsymbol{\beta}}] = \sigma^2 (X^TX)^{-1}$
+\end{itemize}
+
+## Estimation of Variance
 
 
 
+## Inference on model parameters
+
+## Prediction
 
 
 # Bayesian Linear Regression
