@@ -1,5 +1,5 @@
 ---
-title: "MAT 4381 Project"
+title: "Comparing the Bayesian Linear Regression Model to Ordinary Least Squares"
 author: "Joe Zhang and Christian Paravalos"
 date: "Winter 2024"
 output: pdf_document
@@ -44,9 +44,19 @@ The least squares estimator of $\boldsymbol{\beta}$ has the following properties
 
 ## Estimation of Variance
 
+In the frequentist approach, we estimate $\sigma^2$ using the residual sum of squares. We have $$SS_{res} = \sum_{i = 1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} e_i^2 = \boldsymbol{e}^T\boldsymbol{e}$$ where $\hat{y_i}$ are the fitted values of $y_i$ using the least squares model and $e_i = y_i - \hat{y}_i$ are the residuals. $\boldsymbol{e}$ is the vector of the residuals. If we simplify further, we get $$SS_{res} = \boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}$$
 
+The residual sum of squares has $n-p$ degrees of freedom. The residual mean square is $$MS_{res} = \frac{SS_{res}}{n-p}$$
+
+We can show that $$\mathbb{E}[MS_{res}] = \sigma^2$$
+
+Therefore, an unbiased estimator for $\sigma^2$ is given by $$\hat{\sigma^2} = MS_{res} = \frac{\boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}}{n-p}$$
 
 ## Inference on model parameters
+
+After obtaining the estimates of the model parameters, we need to make inference on them. The main goal of inference is to determine if all the explanatory variables are significant to the model. Sometimes when there are too many variables, the accuracy of predictions using the model can decrease significantly. Making inferences can help decide if some variables should not be included in the model.
+
+We have assumed that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$. This consequently leads to that $\boldsymbol{y} \sim N(X\boldsymbol{\beta}, \sigma^2I)$. Under this assumption, we can also get that $$\hat{\boldsymbol{\beta}} \sim N(\boldsymbol{\beta}, \sigma^2(X^TX)^{-1})$$
 
 ## Prediction
 
