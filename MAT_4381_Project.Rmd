@@ -11,9 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Abstract
 
-In this paper, we are comparing Bayesian and Frequentist linear regression models. 
+Linear regression is often used to model relationships between a response variable and one or more explanatory variables. In traditional settings, the ordinary least squares method is used to estimate the model. In this paper, the focus is to develop a linear model by estimating the model parameters under a Bayesian framework and compare the model against the traditional ordinary least squares model using a dataset.
 
 # Introduction
+
+To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon}$$
 
 # Ordinary Least Squares Regression Revisited
 
