@@ -46,11 +46,11 @@ The least squares estimator of $\boldsymbol{\beta}$ has the following properties
 
 In the frequentist approach, we estimate $\sigma^2$ using the residual sum of squares. We have $$SS_{res} = \sum_{i = 1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} e_i^2 = \boldsymbol{e}^T\boldsymbol{e}$$ where $\hat{y_i}$ are the fitted values of $y_i$ using the least squares model and $e_i = y_i - \hat{y}_i$ are the residuals. $\boldsymbol{e}$ is the vector of the residuals. If we simplify further, we get $$SS_{res} = \boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}$$
 
-The residual sum of squares has $n-p$ degrees of freedom. The residual mean square is $$MS_{res} = \frac{SS_{res}}{n-p}$$
+The residual sum of squares has $n-k$ degrees of freedom. The residual mean square is $$MS_{res} = \frac{SS_{res}}{n-p}$$
 
 We can show that $$\mathbb{E}[MS_{res}] = \sigma^2$$
 
-Therefore, an unbiased estimator for $\sigma^2$ is given by $$\hat{\sigma^2} = MS_{res} = \frac{\boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}}{n-p}$$
+Therefore, an unbiased estimator for $\sigma^2$ is given by $$\hat{\sigma^2} = MS_{res} = \frac{\boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}}{n-k}$$
 
 ## Inference on model parameters
 
@@ -58,8 +58,23 @@ After obtaining the estimates of the model parameters, we need to make inference
 
 We have assumed that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$. This consequently leads to that $\boldsymbol{y} \sim N(X\boldsymbol{\beta}, \sigma^2I)$. Under this assumption, we can also get that $$\hat{\boldsymbol{\beta}} \sim N(\boldsymbol{\beta}, \sigma^2(X^TX)^{-1})$$
 
+From this, we can also deduce that $$\hat{\beta_j} \sim N(\beta_j, \sigma^2 (X^TX)^{-1}_{jj})$$ for $j = 1, 2, ..., k$ and $(X^TX)^{-1}_{jj}$ is the j-th diagonal element of the matrix $(X^TX)^{-1}$.
+
+If we standardize $\hat{\beta}$, we get that $$\frac{\hat{\beta_j} - \beta_j}{\sigma \sqrt{(X^TX)^{-1}_{jj}}} \sim N(0, 1)$$
+
+In practice, we do not know the value of $\sigma^2$, which we will need to use in order to make inference on the model parameters. Therefore, the best way is to use the estimate for $\sigma^2$, which is $MS_{res}$. However, if we replace $\sigma^2$ with $MS_{res}$, we get $$\frac{\hat{\beta_j} - \beta_j}{\sqrt{MS_{res}(X^TX)^{-1}_{jj}}} \sim t(n - k)$$
+
+If we want to test the null hypothesis $H_0: \beta_j = \beta_{j_0}$ against the hypothesis $H_1: \beta_j \neq \beta_{j_0}$, we have that under $H_0$ that $$t_0 = \frac{\hat{\beta_j} - \beta_{j_0}}{\sqrt{MS_{res}(X^TX)^{-1}_{jj}}} \sim t(n - k)$$
+
+$t_0$ is the test statistic for the hypothesis $\beta_j = \beta_{j_0}$. We reject $H_0$ if $t_0 > t_{\alpha/2}(n-k)$, where $\alpha$ is the significance level and $t_{\alpha/2}(n-k)$ is the $100(1 - \alpha/2)$th quantile of the Student t distribution with $n - k$ degrees of freedom. We can also compute the p-value, which is $$p\text{-value} = P(|T| > t_0) = 2P(T > t_0)$$ and we reject $H_0$ if it is less than $\alpha$. 
+
+Another way to test the hypothesis $H_0$ against $H_1$ is to construct confidence intervals for the model parameters $\beta_j$. We can deduce that a $100(1 - \alpha)\%$ confidence interval for $\beta_j$ is $$\hat{\beta_j} \pm t_{\alpha/2}(n-k) \cdot \sqrt{MS_{res} (X^TX)^{-1}_{jj}}$$ 
+
+From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained in the interval. Otherwise, we accept $H_0$.
+
 ## Prediction
 
+To make a prediction 
 
 # Bayesian Linear Regression
 
@@ -69,6 +84,14 @@ We have assumed that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$.
 
 # References
 
+Note: These are not cited in proper format yet.
+
 https://en.wikipedia.org/wiki/Bayesian_linear_regression
+
+https://gregorygundersen.com/blog/2020/02/04/bayesian-linear-regression/
+
+https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18
+
+
 
 
