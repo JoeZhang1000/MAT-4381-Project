@@ -74,9 +74,23 @@ From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained 
 
 ## Prediction
 
-To make a prediction 
+The purpose of constructing a model between a response variable and several explanatory variables is to make predictions of future values of the response given certain values of the explanatory variables. To predict $\boldsymbol{y}$ at a given $X$, we simply use the fitted model $$\hat{\boldsymbol{y}} = X\hat{\boldsymbol{\beta}}$$
+
+To construct a confidence interval for a prediction, we have that 
 
 # Bayesian Linear Regression
+
+Now, we turn to the Bayesian approach to estimate a linear regression model between a response variable and several explanatory variables. The form of the model is the same as in the ordinary least squares framework $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon}$$
+
+## Estimation of Parameters
+
+We make the same assumptions as in the ordinary least squares framework, where $\boldsymbol{\epsilon} \sim N_n(\boldsymbol{0}, \sigma^2 I)$. We need to estimate $k + 1$ parameters: the $k$ model coefficients, and $\sigma^2$.
+
+With the assumption, we have that $$\boldsymbol{y} \sim N_n(X\boldsymbol{\beta}, \sigma^2I)$$
+
+Therefore, the likelihood function is $$f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) = \frac{1}{(2\pi)^{n/2}(\sigma^2)^{n/2}} \exp \left[\frac{1}{2\sigma^2}(\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right]$$
+
+To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumption we will use 
 
 # Application
 
