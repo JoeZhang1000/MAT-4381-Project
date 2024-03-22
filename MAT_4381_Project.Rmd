@@ -86,11 +86,69 @@ Now, we turn to the Bayesian approach to estimate a linear regression model betw
 
 We make the same assumptions as in the ordinary least squares framework, where $\boldsymbol{\epsilon} \sim N_n(\boldsymbol{0}, \sigma^2 I)$. We need to estimate $k + 1$ parameters: the $k$ model coefficients, and $\sigma^2$.
 
+### Likelihood Function
+
 With the assumption, we have that $$\boldsymbol{y} \sim N_n(X\boldsymbol{\beta}, \sigma^2I)$$
 
 Therefore, the likelihood function is $$f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) = \frac{1}{(2\pi)^{n/2}(\sigma^2)^{n/2}} \exp \left[\frac{1}{2\sigma^2}(\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right]$$
 
-To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumption we will use are 
+### Choosing a prior distribution
+
+To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumption we will use are $$\boldsymbol{\beta}|\sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2V)$$ and $$\sigma^2 \sim IG(a, b)$$ where $\boldsymbol{m}$ is a $k \times 1$ vector of real numbers, $V$ is a $k \times k$ matrix of real numbers, and $a$ and $b$ are both real numbers.
+
+Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsymbol{\beta}, \sigma^2) = g(\boldsymbol{\beta} | \sigma^2)g(\sigma^2)$$ where $$g(\boldsymbol{\beta}|\sigma^2) = \frac{1}{(2\pi \sigma^2)^{k/2}}|V|^{-\frac{k}{2}} \exp \left(-\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right)$$ and $$g(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-(a+1)} \exp \left( -\frac{b}{\sigma^2} \right)$$
+
+### Computation of posterior distribution
+
+Now that we have the likelihood function and the prior probability distribution of the parameters, we can now compute the posterior distribution of the parameters. We let $h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)$ represent the posterior distribution function:
+
+\begin{equation*}
+  \begin{split}
+    h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)
+    & \propto f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) g(\boldsymbol{\beta}, \sigma^2) \\
+    & \propto f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) g(\boldsymbol{\beta} | \sigma^2) g(\sigma^2) \\
+    & \propto (2 \pi \sigma^2)^{-\frac{n}{2}} \exp \left( -\frac{1}{2\sigma^2} (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right) (2 \pi \sigma^2)^{-\frac{k}{2}} |V|^{-\frac{k}{2}} \exp \left( -\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right) \\
+    & \times \frac{b^a}{\Gamma(a)} (\sigma^2)^{-(a+1)} \exp \left(-\frac{b}{\sigma^2} \right) \\
+    & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} [(\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) + (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) + 2b] \right) \\
+    & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} A \right)
+  \end{split}
+\end{equation*}
+
+We now want to rewrite the equation above by simplifying the quantity inside the exponential function. We do the following:
+
+\begin{equation*}
+  \begin{split}
+    A
+    &= (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) + (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{y} - \boldsymbol{m}) + 2b \\
+    &= \boldsymbol{y}^T\boldsymbol{y} - \boldsymbol{y}^TX\boldsymbol{\beta} - \boldsymbol{\beta}^TX^T \boldsymbol{y} + \boldsymbol{\beta}^TX^TX\boldsymbol{\beta} + \boldsymbol{\beta}^TV^{-1}\boldsymbol{\beta} - \boldsymbol{\beta}^TV^{-1}\boldsymbol{m} - \boldsymbol{m}^TV^{-1}\boldsymbol{\beta} + \boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b \\
+    &= \boldsymbol{\beta}^T(X^TX+V^{-1})\boldsymbol{\beta} - \boldsymbol{\beta}^T(X^T\boldsymbol{y} + V^{-1}\boldsymbol{m}) + (\boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b + \boldsymbol{y}^T\boldsymbol{y}) - (\boldsymbol{y}^TX + \boldsymbol{m}^TV^{-1})\boldsymbol{\beta}
+  \end{split}
+\end{equation*}
+
+We define the following quantities:
+
+$$\Lambda = (X^TX + V^{-1})^{-1}$$ and $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1}\boldsymbol{m})$$
+
+where $\Lambda$ is a $k \times k$ matrix and $\boldsymbol{\mu}$ is a $k \times 1$ vector.
+
+Then we can write 
+
+\begin{equation*}
+  \begin{split}
+    A
+    &= \boldsymbol{\beta}^T\Lambda^{-1}\boldsymbol{\beta} - \boldsymbol{\beta}^T\Lambda^{-1}\boldsymbol{\mu} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\beta} + \boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b + \boldsymbol{y}^T\boldsymbol{y} \\
+    &= (\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu}) - \boldsymbol{\mu}^T \Lambda^{-1} \boldsymbol{\mu} + \boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b + \boldsymbol{y}^T\boldsymbol{y}
+  \end{split}
+\end{equation*}
+
+Now, we go back to the posterior distribution and we can write:
+
+\begin{equation*}
+  \begin{split}
+    h(\boldsymbol{\beta}, \sigma^2)
+    & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} A \right) 
+  \end{split}
+\end{equation*}
 
 # Application
 
