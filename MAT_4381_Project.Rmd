@@ -90,7 +90,7 @@ With the assumption, we have that $$\boldsymbol{y} \sim N_n(X\boldsymbol{\beta},
 
 Therefore, the likelihood function is $$f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) = \frac{1}{(2\pi)^{n/2}(\sigma^2)^{n/2}} \exp \left[\frac{1}{2\sigma^2}(\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right]$$
 
-To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumption we will use 
+To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumption we will use are 
 
 # Application
 
