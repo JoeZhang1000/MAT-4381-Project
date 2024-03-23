@@ -163,11 +163,37 @@ We now have the posterior distribution of $(\boldsymbol{\beta}, \sigma^2)$. From
 
 The main goal is to estimate the parameters. We first need to find the marginal distribution of $\boldsymbol{\beta}$. This is hard to do by hand since we have to solve the following integral: $$h(\boldsymbol{\beta} | \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X) \, d(\sigma^2)$$ Therefore, we need to use computational methods to simulate the posterior marginal distribution for $\boldsymbol{\beta}$.
 
-To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$.
+To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$. Then the marginal distribution for $\beta_j$ is $$h(\beta_j| \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\beta_j | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X)\, d(\sigma^2)$$ This integral is also hard to compute, so we need to use computational methods. 
 
+Given the marginal distribution, we can use it to find the mean and variance of $\beta_j$ and we can also construct credible regions to decide if the explanatory variable associated with the parameter is significant to the model. If the credible region contain 0, then we can conclude that the parameter and its associated explanatory variable is not significant to the model. Otherwise, we conclude that it is significant.
 
+## Simulation Algorithm to Compute Posterior
+
+To simulate the marginal distribution for a parameter $\beta_j$, we can use the following algorithm:
+
+1. Load the data.
+
+2. Initialize the chosen parameters $\boldsymbol{m}$, $V$, $a$, and $b$.
+
+3. Compute $\boldsymbol{\mu}$, $\Lambda$, $\alpha$, and $r$ using the data and the initialized prior parameters.
+
+4. Simulate $\sigma^2$ a large number of times from the $IG(\alpha, r)$ distribution.
+
+5. For each simulated value of $\sigma^2$, simulate $\beta_j$ from the $N(\mu_j, \sigma^2 \Lambda_{jj})$ distribution.
+
+6. Draw a graph for the simulated distribution of $\beta_j$, then compute its center and a 95\% credible region.
 
 # Application
+
+Now we have established the theory behind Bayesian linear regression, we now compare the Bayesian linear regression model to the ordinary least squares model on a data set. 
+
+## Data Description and Preprocessing
+
+## Ordinary Least Squares Model
+
+## Bayesian Linear Regression Model
+
+## Comparison Between Models
 
 # Conclusion
 
