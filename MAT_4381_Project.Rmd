@@ -333,6 +333,11 @@ for i in range(num_predictors):
     print(f"95% credible region for Beta Hat {i}: ({value_at_25}, {value_at_975})")
     
 for i in range(num_predictors):
+  
+    sorted_beta_hat_i = np.sort(beta_hat[:, i])
+
+    value_at_975 = sorted_beta_hat_i[np.floor(0.975 * sampling_size).astype(int)]
+    value_at_25 = sorted_beta_hat_i[np.floor(0.025 * sampling_size).astype(int)]
 
     #Create histograms for beta_hat_i
     plt.hist(beta_hat[:, i], bins=30, color=colors(i), alpha=0.5, label=f'Posterior of Beta Hat {i}')
