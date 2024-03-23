@@ -227,6 +227,7 @@ anova(full_model)
 
 summary(full_model)
 
+cat("MSE: ",  mean((thermalData$y - predict(full_model, newdata=thermalData))^2))
 
 
 ```
@@ -235,14 +236,13 @@ First off, we can see that the test for significance of regression would allow u
 
 ```{r}
 
-reduced_model =lm(y~x1+x2+x3+x4,data=thermalData)
+reduced_model = lm(y~x1+x2+x3+x4,data=thermalData)
 
 anova(reduced_model)
 
 summary(reduced_model)
 
-plot(reduced_model)
-plot(full_model)
+cat("MSE: ",  mean((thermalData$y - predict(reduced_model, newdata=thermalData))^2))
 
 ```
 
@@ -342,6 +342,11 @@ for i in range(num_predictors):
     plt.ylabel('Frequency')
     plt.legend()
     plt.show()
+
+#Compute MSE
+MSE = np.mean((y - X @ mu_post)**2)
+
+print(f"Bayesian MSE: {MSE}")
 
 ```
 
