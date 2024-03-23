@@ -7,6 +7,8 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+use_condaenv("base")
 ```
 
 # Abstract
@@ -191,7 +193,158 @@ Now we have established the theory behind Bayesian linear regression, we now com
 
 ## Ordinary Least Squares Model
 
+Taken from my assignment from last year for regression for testing:
+
+```{r}
+
+library(olsrr)
+library(MPV)
+
+thermalData <- table.b2
+
+model <- lm(y ~ ., data=table.b2)
+
+print(model)
+
+ols_step_forward_p(model, details = FALSE)
+
+```
+
+```{r}
+K <- ols_step_all_possible(model, details=TRUE)
+
+print(K)
+
+```
+
+When looking at the statistics for the different models, we are only allowed to currently look at a few statistics, but in part e, I'll look into more statistics. For the models with one to two predictors, I'm not going to go into much detail about them as their $R^2$, $R^2_{adj}$ are significantly lower than the models with a higher number of predictors (and consequently this means their MSE is much higher). Additionally, all of their Mallow's CP values are astronomically higher than the value they should be around (value they should be around is $p$ where $p$ represents the number of predictors in the model). Moving on to the 3 variable models, it seems that the model with the predictors $X_2$, $X_3$, and $X_4$ has the highest $R^2$ value of around 87.4% and a $R^2_{adj}$ value of 85.9%. It seems that for this model the Mallow's CP value has become much closer to the desired value (it is around 7.596), which for the case of a model with 3 predictors would be 3. Fortunately, for the 4 predictor models, the best model based on $R^2$ has an $R^2$ value of around 89.1% and an $R^2_{adj}$ value of around 87.3% (MSE of 1945.334), with the predictors $X_1$, $X_2$, $X_3$, and $X_4$ in the model. Now, the Mallow's CP value is pretty close to its target value of p=4 for this model, but still is around 1.79 higher than 4. In comparison to the full model with all the predictors present, the full model has a Mallow's CP value closer to the desired value of p=5, coming in at exactly 1 above the desired value. In terms of $R^2$ and $R^2_{adj}$, it seems that these values are barely higher than the 4 predictor model, indicating that adding $X_5$ to the model doesn't add much predictive power (MSE of 1887.116 and $R^2_{adj}$ value of around 87.7%). Even though the Mallow's CP value is closer to its desired value for the full model with 5 predictors, I think the benefit of having one less variable with approximately the same $R^2_{adj}$ value outweighs the disadvantage. So, if favoring simplicity, I would choose the 4 predictor model with predictors $X_1$, $X_2$, $X_3$, and $X_4$, but if wanting the best absolute $R^2_{adj}$ value and closest Mallow's CP value to the line, then the full model with 5 predictors would be a better choice. I have to further analyze the significance of adding $X_5$ to the best 4 predictor model, such as using the partial F-test to determine whether it should be added. I can also see the values for AIC and SBC even though technically we aren't allowed to look at them yet, and they further indicate that the best 4 predictor model without $X_5$ as a predictor is as good if not better than the full model. But using just this information of $R^2$, $R^2_{adj}$, and Mallow's CP, at first glance it seems the five predictor model is better (but we will show it is probably not).
+
+```{r}
+
+full_model=lm(y~x1+x2+x3+x4+x5,data=thermalData)
+
+anova(full_model)
+
+summary(full_model)
+
+
+
+```
+
+First off, we can see that the test for significance of regression would allow us to reject the null hypothesis that all predictors in the model don't have a linear relationship in the current model with the response variable, indicating significance of this model in explaining/predicting the response Y. We can see that for the t-tests that each coefficient of the predictor is 0 and that the predictor doesn't add significantly to the current model, we can note that $X_1$, $X_3$, and $X_4$ have small p-values for this test where we would reject the null hypothesises at a significance level of 5% that their coefficients are equal to 0 and that they don't significantly improve the model given the other predictors present in the model. Now, $X_2$'s t-test's p-value would not allow us to reject the null hypothesis that it does not significantly improve the model, but I still believe that it has some statistical power, but it is toeing the line. On the other hand, $X_5$ has a very large p-value of 19.4% for the t-test, indicating that it does not improve the model significantly. As forward and backwards stepwise regression both use a p-value of 30% to add or remove a variable from the model using the partial F test/t-test for the predictor, they tend to add too many variables, at least in this case. Now, the models that I chose for part c. and d. were the 4 predictor model with the predictors $X_1$, $X_2$, $X_3$, and $X_4$. We will look at the summary of the model below:
+
+```{r}
+
+reduced_model =lm(y~x1+x2+x3+x4,data=thermalData)
+
+anova(reduced_model)
+
+summary(reduced_model)
+
+plot(reduced_model)
+plot(full_model)
+
+```
+
+Strangely enough, in this 4 predictor model, we get that $X_1$ does not significantly improve the model given the other predictors in the model (using a significance level of 5% based on the t-tests), while the other predictors do. We can note that the model with 1 predictor with $X_1$ alone had a very large $R^2$ value, so this predictor alone did have a lot of predictive power on $Y$. I won't go over again my discussion about the other statistics such as Mallow's CP as I did in part d., but we concluded then that the model with 4 predictors is probably better. I still stick with this statement as when looking at the t-test for the significance of $X_5$ in the full model, we pretty resoundingly don't reject the null hypothesis that it has no predictive/explanative power on Y in the model given the other predictors already in it.
+
+Using the information given here, I would choose the best model as the one with 4 predictors. For the 4 predictor models, the best model based on $R^2$ has an $R^2$ value of around 89.1% and an $R^2_{adj}$ value of around 87.3%, with the predictors $X_1$, $X_2$, $X_3$, and $X_4$ in the model. Now, the Mallow's CP value is pretty close to its target value of p=4 for this model, but still is around 1.79 higher than 4. In comparison to the full model with all the predictors present, the full model has a Mallow's CP value closer to the desiired value of p=5, coming in at exactly 1 above the desired value. In terms of $R^2$ and $R^2_{adj}$, it seems that these values are barely higher than the 4 predictor model, indicating that adding $X_5$ to the model doesn't add much predictive power. Even though the Mallow's CP value is closer to its desired value for the full model with 5 predictors, I think the benefit of having one less variable with approximately the same $R^2_{adj}$ value outweighs the disadvantage. Looking at the AIC and SBC values, which are somewhat similar metrics, the 4 predictor model has a slightly higher AIC value than the 5 predictor model, but a lower SBIC value. This indicates it is probably the better model to pick. So I would pick this 4 predictor model.
+
+Note that the 4 and 5 predictor models both have issues with the residuals that estimate the error terms indicating that normality is violated in both models.
+
 ## Bayesian Linear Regression Model
+
+Messy Code:
+
+```{python}
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
+#Load the data from a text file mak ethe fist row the header and use tab as the separator
+data = pd.read_csv('~/Downloads/thermalData.csv', header=0, sep=',')
+
+#Delete rows with missing values
+data = data.dropna()
+
+data.insert(1, 'intercept_term', 1)
+
+num_predictors = len(data.columns) - 1
+
+#Set sampling size
+sampling_size = 10000
+
+#Set the parameters for the prior distribution for sigma2 (inverse gamma) (non-informative)
+a = 0.001
+b = 0.001
+
+#Set the parameters for the prior distribution for mu (normal) (non-informative)
+
+#Create the matrix for V
+V = np.eye(num_predictors)
+m = np.zeros(num_predictors)
+
+X = data.iloc[:, 1:7].to_numpy()
+y = data.iloc[:, 0].to_numpy()
+
+#Compute the inverse of V
+V_inv = np.linalg.inv(V)
+
+#Compute the mean of the posterior distribution of beta given sigma2 (normal)
+mu_post = np.linalg.inv(X.T @ X + V_inv) @ (X.T @ y + V_inv @ m)
+
+#Compute the lambda matrix of the posterior distribution of beta given sigma2 (normal)
+lambda_post = np.linalg.inv(X.T @ X + V_inv)
+
+#Compute alpha paramater of sigma2 posterior distribution (inverse gamma)
+alpha_post = a + len(y) / 2
+r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) @ mu_post + 2*b + y.T @ y) / 2
+
+print(mu_post)
+
+# Step 4: Drawing sigma2 from the inverse gamma distribution
+sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_size)
+
+#Create the vector for beta_hat
+beta_hat = np.zeros((sampling_size, num_predictors))
+
+for i in range(sampling_size):
+    beta_hat[i, :] = np.random.multivariate_normal(mu_post, lambda_post * sigma2[i])
+
+plt.hist(sigma2, bins=30, alpha=0.5, color='orange', label='Posterior of sigma^2')
+plt.xlabel('sigma^2')
+plt.ylabel('Frequency')
+plt.legend()
+plt.show()
+
+colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
+
+for i in range(num_predictors):
+
+    sorted_beta_hat_i = np.sort(beta_hat[:, i])
+
+    value_at_975 = sorted_beta_hat_i[np.floor(0.975 * sampling_size).astype(int)]
+    value_at_25 = sorted_beta_hat_i[np.floor(0.025 * sampling_size).astype(int)]
+
+    print(f"Best Estimate for Beta (Beta Hat) (mean/mode/median of posterior normal distribution for Beta {i}: {mu_post[i]}")
+    print(f"Best Estimate for Standard Deviation of Beta {i}: {lambda_post[i][i] * sigma2[i]}")
+    #Print the 95% credible region for beta_hat_i
+    print(f"95% credible region for Beta Hat {i}: ({value_at_25}, {value_at_975})")
+
+    #Create histograms for beta_hat_i
+    plt.hist(beta_hat[:, i], bins=30, color=colors(i), alpha=0.5, label=f'Posterior of Beta Hat {i}')
+    plt.axvline(x=value_at_25, color='r', linestyle='--', label='Lower 95% CR Bound')
+    plt.axvline(x=value_at_975, color='r', linestyle='--', label='Upper 95% CR Bound')
+    plt.axvline(x=mu_post[i], color='b', linestyle='--', label='Posterior Beta Estimate')
+
+    plt.xlabel(f'Beta Hat {i}')
+    plt.ylabel('Frequency')
+    plt.legend()
+    plt.show()
+
+
+```
 
 ## Comparison Between Models
 
@@ -206,7 +359,3 @@ https://en.wikipedia.org/wiki/Bayesian_linear_regression
 https://gregorygundersen.com/blog/2020/02/04/bayesian-linear-regression/
 
 https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18
-
-
-
-
