@@ -335,14 +335,13 @@ for i in range(num_predictors):
     #Create histograms for beta_hat_i
     plt.hist(beta_hat[:, i], bins=30, color=colors(i), alpha=0.5, label=f'Posterior of Beta Hat {i}')
     plt.axvline(x=value_at_25, color='r', linestyle='--', label='Lower 95% CR Bound')
-    plt.axvline(x=value_at_975, color='r', linestyle='--', label='Upper 95% CR Bound')
+    plt.axvline(x=value_at_975, color='darkred', linestyle='--', label='Upper 95% CR Bound')
     plt.axvline(x=mu_post[i], color='b', linestyle='--', label='Posterior Beta Estimate')
 
     plt.xlabel(f'Beta Hat {i}')
     plt.ylabel('Frequency')
     plt.legend()
     plt.show()
-
 
 ```
 
