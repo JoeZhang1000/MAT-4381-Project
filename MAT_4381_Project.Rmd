@@ -145,10 +145,27 @@ Now, we go back to the posterior distribution and we can write:
 
 \begin{equation*}
   \begin{split}
-    h(\boldsymbol{\beta}, \sigma^2)
-    & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} A \right) 
+    h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)
+    & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} A \right) \\
+    & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} ((\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu}) - \boldsymbol{\mu}^T \Lambda^{-1} \boldsymbol{\mu} + \boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b + \boldsymbol{y}^T\boldsymbol{y}) \right) \\
+    & \propto (\sigma^2)^{-\frac{k}{2}} \exp \left(\frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2 \sigma^2} \right) (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T \Lambda^{-1} \boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2\sigma^2}\right)
   \end{split}
 \end{equation*}
+
+From looking at the posterior distribution, we can see that it is the product of a multivariate normal distribution and an inverse gamma distribution. We can parameterize the posterior the following way:
+
+$$h(\boldsymbol{\beta}, \sigma^2| \boldsymbol{y}, X) = h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X)h(\sigma^2|\boldsymbol{y}, X)$$ where $$h(\boldsymbol{\beta}| \sigma^2, \boldsymbol{y}, X) = \frac{1}{(2 \pi \sigma^2)^{-\frac{k}{2}}} \exp \left( \frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2\sigma^2}\right)$$ and $$h(\sigma^2| \boldsymbol{y}, X) = \frac{(\frac{1}{2}(\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}))^{\frac{n}{2} + a}}{\Gamma(a + \frac{n}{2})} (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2 \sigma^2}\right)$$
+Then we get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda)$$ and $$\sigma^2| \boldsymbol{y}, X \sim IG(\alpha, r)$$ where $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1} \boldsymbol{m})$$ $$\Lambda = (X^TX + V^{-1})^{-1}$$ $$\alpha = a + \frac{n}{2}$$ $$r = \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2}$$
+
+## Making Bayesian inference
+
+We now have the posterior distribution of $(\boldsymbol{\beta}, \sigma^2)$. From that, we also get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda^{-1})$$ and $$\sigma^2 | \boldsymbol{y}, X \sim IG(\alpha, r)$$ 
+
+The main goal is to estimate the parameters. We first need to find the marginal distribution of $\boldsymbol{\beta}$. This is hard to do by hand since we have to solve the following integral: $$h(\boldsymbol{\beta} | \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X) \, d(\sigma^2)$$ Therefore, we need to use computational methods to simulate the posterior marginal distribution for $\boldsymbol{\beta}$.
+
+To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$.
+
+
 
 # Application
 
