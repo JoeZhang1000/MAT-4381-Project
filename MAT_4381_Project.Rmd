@@ -326,11 +326,13 @@ for i in range(num_predictors):
 
     value_at_975 = sorted_beta_hat_i[np.floor(0.975 * sampling_size).astype(int)]
     value_at_25 = sorted_beta_hat_i[np.floor(0.025 * sampling_size).astype(int)]
-
+    
     print(f"Best Estimate for Beta (Beta Hat) (mean/mode/median of posterior normal distribution for Beta {i}: {mu_post[i]}")
     print(f"Best Estimate for Standard Deviation of Beta {i}: {lambda_post[i][i] * sigma2[i]}")
     #Print the 95% credible region for beta_hat_i
     print(f"95% credible region for Beta Hat {i}: ({value_at_25}, {value_at_975})")
+    
+for i in range(num_predictors):
 
     #Create histograms for beta_hat_i
     plt.hist(beta_hat[:, i], bins=30, color=colors(i), alpha=0.5, label=f'Posterior of Beta Hat {i}')
