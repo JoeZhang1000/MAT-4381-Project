@@ -13,11 +13,11 @@ use_condaenv("base")
 
 # Abstract
 
-Linear regression is often used to model relationships between a response variable and one or more explanatory variables. In traditional settings, the ordinary least squares method is used to estimate the model. In this paper, our goal is to develop a linear model by estimating the model parameters under a Bayesian framework and compare the model against the traditional ordinary least squares model using a dataset. 
+Linear regression is often used to model relationships between a response variable and one or more explanatory variables. In traditional settings, the ordinary least squares method is used to estimate the model. In this paper, our goal is to develop a linear model by estimating the model parameters under a Bayesian framework and compare the model against the traditional ordinary least squares model using a dataset.
 
 # Introduction
 
-To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors with each observation, $n$ is the number of observations, and $k$ is the number of parameters. The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have 
+To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors with each observation, $n$ is the number of observations, and $k$ is the number of parameters. The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have
 
 $$\boldsymbol{y} = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix} \text{, } \quad X = \begin{bmatrix} 1 & x_{11} & x_{12} & \cdots & x_{1k} \\ 1 & x_{21} & x_{22} & \cdots & x_{2k} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 1 & x_{n1} & x_{n2} & \cdots & x_{nk} \end{bmatrix} \text{, } \quad \boldsymbol{\beta} = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_{k-1} \end{bmatrix} \text{, } \quad \boldsymbol{\epsilon} = \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n \end{bmatrix}$$
 
@@ -39,11 +39,12 @@ If we multiply both sides by the inverse of $X^TX$, assuming that it is invertib
 
 The least squares estimator of $\boldsymbol{\beta}$ has the following properties:
 
+```{=tex}
 \begin{itemize}
   \item $\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}$
   \item $Var[\hat{\boldsymbol{\beta}}] = \sigma^2 (X^TX)^{-1}$
 \end{itemize}
-
+```
 ## Estimation of Variance
 
 In the frequentist approach, we estimate $\sigma^2$ using the residual sum of squares. We have $$SS_{res} = \sum_{i = 1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} e_i^2 = \boldsymbol{e}^T\boldsymbol{e}$$ where $\hat{y_i}$ are the fitted values of $y_i$ using the least squares model and $e_i = y_i - \hat{y}_i$ are the residuals. $\boldsymbol{e}$ is the vector of the residuals. If we simplify further, we get $$SS_{res} = \boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}$$
@@ -68,9 +69,9 @@ In practice, we do not know the value of $\sigma^2$, which we will need to use i
 
 If we want to test the null hypothesis $H_0: \beta_j = \beta_{j_0}$ against the hypothesis $H_1: \beta_j \neq \beta_{j_0}$, we have that under $H_0$ that $$t_0 = \frac{\hat{\beta_j} - \beta_{j_0}}{\sqrt{MS_{res}(X^TX)^{-1}_{jj}}} \sim t(n - k)$$
 
-$t_0$ is the test statistic for the hypothesis $\beta_j = \beta_{j_0}$. We reject $H_0$ if $t_0 > t_{\alpha/2}(n-k)$, where $\alpha$ is the significance level and $t_{\alpha/2}(n-k)$ is the $100(1 - \alpha/2)$th quantile of the Student t distribution with $n - k$ degrees of freedom. We can also compute the p-value, which is $$p\text{-value} = P(|T| > t_0) = 2P(T > t_0)$$ and we reject $H_0$ if it is less than $\alpha$. 
+$t_0$ is the test statistic for the hypothesis $\beta_j = \beta_{j_0}$. We reject $H_0$ if $t_0 > t_{\alpha/2}(n-k)$, where $\alpha$ is the significance level and $t_{\alpha/2}(n-k)$ is the $100(1 - \alpha/2)$th quantile of the Student t distribution with $n - k$ degrees of freedom. We can also compute the p-value, which is $$p\text{-value} = P(|T| > t_0) = 2P(T > t_0)$$ and we reject $H_0$ if it is less than $\alpha$.
 
-Another way to test the hypothesis $H_0$ against $H_1$ is to construct confidence intervals for the model parameters $\beta_j$. We can deduce that a $100(1 - \alpha)\%$ confidence interval for $\beta_j$ is $$\hat{\beta_j} \pm t_{\alpha/2}(n-k) \cdot \sqrt{MS_{res} (X^TX)^{-1}_{jj}}$$ 
+Another way to test the hypothesis $H_0$ against $H_1$ is to construct confidence intervals for the model parameters $\beta_j$. We can deduce that a $100(1 - \alpha)\%$ confidence interval for $\beta_j$ is $$\hat{\beta_j} \pm t_{\alpha/2}(n-k) \cdot \sqrt{MS_{res} (X^TX)^{-1}_{jj}}$$
 
 From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained in the interval. Otherwise, we accept $H_0$.
 
@@ -78,7 +79,7 @@ From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained 
 
 The purpose of constructing a model between a response variable and several explanatory variables is to make predictions of future values of the response given certain values of the explanatory variables. To predict $\boldsymbol{y}$ at a given $X$, we simply use the fitted model $$\hat{\boldsymbol{y}} = X\hat{\boldsymbol{\beta}}$$
 
-To construct a confidence interval for a prediction, we have that 
+To construct a confidence interval for a prediction, we have that
 
 # Bayesian Linear Regression
 
@@ -104,6 +105,7 @@ Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsym
 
 Now that we have the likelihood function and the prior probability distribution of the parameters, we can now compute the posterior distribution of the parameters. We let $h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)$ represent the posterior distribution function:
 
+```{=tex}
 \begin{equation*}
   \begin{split}
     h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)
@@ -115,9 +117,10 @@ Now that we have the likelihood function and the prior probability distribution 
     & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} A \right)
   \end{split}
 \end{equation*}
-
+```
 We now want to rewrite the equation above by simplifying the quantity inside the exponential function. We do the following:
 
+```{=tex}
 \begin{equation*}
   \begin{split}
     A
@@ -126,15 +129,16 @@ We now want to rewrite the equation above by simplifying the quantity inside the
     &= \boldsymbol{\beta}^T(X^TX+V^{-1})\boldsymbol{\beta} - \boldsymbol{\beta}^T(X^T\boldsymbol{y} + V^{-1}\boldsymbol{m}) + (\boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b + \boldsymbol{y}^T\boldsymbol{y}) - (\boldsymbol{y}^TX + \boldsymbol{m}^TV^{-1})\boldsymbol{\beta}
   \end{split}
 \end{equation*}
-
+```
 We define the following quantities:
 
 $$\Lambda = (X^TX + V^{-1})^{-1}$$ and $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1}\boldsymbol{m})$$
 
 where $\Lambda$ is a $k \times k$ matrix and $\boldsymbol{\mu}$ is a $k \times 1$ vector.
 
-Then we can write 
+Then we can write
 
+```{=tex}
 \begin{equation*}
   \begin{split}
     A
@@ -142,9 +146,10 @@ Then we can write
     &= (\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu}) - \boldsymbol{\mu}^T \Lambda^{-1} \boldsymbol{\mu} + \boldsymbol{m}^TV^{-1}\boldsymbol{m} + 2b + \boldsymbol{y}^T\boldsymbol{y}
   \end{split}
 \end{equation*}
-
+```
 Now, we go back to the posterior distribution and we can write:
 
+```{=tex}
 \begin{equation*}
   \begin{split}
     h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)
@@ -153,19 +158,18 @@ Now, we go back to the posterior distribution and we can write:
     & \propto (\sigma^2)^{-\frac{k}{2}} \exp \left(\frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2 \sigma^2} \right) (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T \Lambda^{-1} \boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2\sigma^2}\right)
   \end{split}
 \end{equation*}
-
+```
 From looking at the posterior distribution, we can see that it is the product of a multivariate normal distribution and an inverse gamma distribution. We can parameterize the posterior the following way:
 
-$$h(\boldsymbol{\beta}, \sigma^2| \boldsymbol{y}, X) = h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X)h(\sigma^2|\boldsymbol{y}, X)$$ where $$h(\boldsymbol{\beta}| \sigma^2, \boldsymbol{y}, X) = \frac{1}{(2 \pi \sigma^2)^{-\frac{k}{2}}} \exp \left( \frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2\sigma^2}\right)$$ and $$h(\sigma^2| \boldsymbol{y}, X) = \frac{(\frac{1}{2}(\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}))^{\frac{n}{2} + a}}{\Gamma(a + \frac{n}{2})} (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2 \sigma^2}\right)$$
-Then we get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda)$$ and $$\sigma^2| \boldsymbol{y}, X \sim IG(\alpha, r)$$ where $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1} \boldsymbol{m})$$ $$\Lambda = (X^TX + V^{-1})^{-1}$$ $$\alpha = a + \frac{n}{2}$$ $$r = \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2}$$
+$$h(\boldsymbol{\beta}, \sigma^2| \boldsymbol{y}, X) = h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X)h(\sigma^2|\boldsymbol{y}, X)$$ where $$h(\boldsymbol{\beta}| \sigma^2, \boldsymbol{y}, X) = \frac{1}{(2 \pi \sigma^2)^{-\frac{k}{2}}} \exp \left( \frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2\sigma^2}\right)$$ and $$h(\sigma^2| \boldsymbol{y}, X) = \frac{(\frac{1}{2}(\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}))^{\frac{n}{2} + a}}{\Gamma(a + \frac{n}{2})} (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2 \sigma^2}\right)$$ Then we get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda)$$ and $$\sigma^2| \boldsymbol{y}, X \sim IG(\alpha, r)$$ where $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1} \boldsymbol{m})$$ $$\Lambda = (X^TX + V^{-1})^{-1}$$ $$\alpha = a + \frac{n}{2}$$ $$r = \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2}$$
 
 ## Making Bayesian inference
 
-We now have the posterior distribution of $(\boldsymbol{\beta}, \sigma^2)$. From that, we also get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda^{-1})$$ and $$\sigma^2 | \boldsymbol{y}, X \sim IG(\alpha, r)$$ 
+We now have the posterior distribution of $(\boldsymbol{\beta}, \sigma^2)$. From that, we also get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda^{-1})$$ and $$\sigma^2 | \boldsymbol{y}, X \sim IG(\alpha, r)$$
 
 The main goal is to estimate the parameters. We first need to find the marginal distribution of $\boldsymbol{\beta}$. This is hard to do by hand since we have to solve the following integral: $$h(\boldsymbol{\beta} | \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X) \, d(\sigma^2)$$ Therefore, we need to use computational methods to simulate the posterior marginal distribution for $\boldsymbol{\beta}$.
 
-To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$. Then the marginal distribution for $\beta_j$ is $$h(\beta_j| \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\beta_j | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X)\, d(\sigma^2)$$ This integral is also hard to compute, so we need to use computational methods. 
+To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$. Then the marginal distribution for $\beta_j$ is $$h(\beta_j| \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\beta_j | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X)\, d(\sigma^2)$$ This integral is also hard to compute, so we need to use computational methods.
 
 Given the marginal distribution, we can use it to find the mean and variance of $\beta_j$ and we can also construct credible regions to decide if the explanatory variable associated with the parameter is significant to the model. If the credible region contain 0, then we can conclude that the parameter and its associated explanatory variable is not significant to the model. Otherwise, we conclude that it is significant.
 
@@ -173,47 +177,95 @@ Given the marginal distribution, we can use it to find the mean and variance of 
 
 To simulate the marginal distribution for a parameter $\beta_j$, we can use the following algorithm:
 
-1. Load the data.
+1.  Load the data.
 
-2. Initialize the chosen parameters $\boldsymbol{m}$, $V$, $a$, and $b$.
+2.  Initialize the chosen parameters $\boldsymbol{m}$, $V$, $a$, and $b$.
 
-3. Compute $\boldsymbol{\mu}$, $\Lambda$, $\alpha$, and $r$ using the data and the initialized prior parameters.
+3.  Compute $\boldsymbol{\mu}$, $\Lambda$, $\alpha$, and $r$ using the data and the initialized prior parameters.
 
-4. Simulate $\sigma^2$ a large number of times from the $IG(\alpha, r)$ distribution.
+4.  Simulate $\sigma^2$ a large number of times from the $IG(\alpha, r)$ distribution.
 
-5. For each simulated value of $\sigma^2$, simulate $\beta_j$ from the $N(\mu_j, \sigma^2 \Lambda_{jj})$ distribution.
+5.  For each simulated value of $\sigma^2$, simulate $\beta_j$ from the $N(\mu_j, \sigma^2 \Lambda_{jj})$ distribution.
 
-6. Draw a graph for the simulated distribution of $\beta_j$, then compute its center and a 95\% credible region.
+6.  Draw a graph for the simulated distribution of $\beta_j$, then compute its center and a 95% credible region.
 
 # Application
 
-Now we have established the theory behind Bayesian linear regression, we now compare the Bayesian linear regression model to the ordinary least squares model on a data set. 
+Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset [citation]. \textbf{Note for Joe}: I removed a few predictors for simplicity for now, idk whether to add them in the end but we'll see.
 
 ## Data Description and Preprocessing
 
 ## Ordinary Least Squares Model
 
-Taken from my assignment from last year for regression for testing:
+We now
 
 ```{r}
-
+library(caret)
 library(olsrr)
-library(MPV)
 
-thermalData <- table.b2
+set.seed(1)
 
-model <- lm(y ~ ., data=table.b2)
+boston_housing_dataset <- read.csv("Boston.csv")
 
-print(model)
+#Remove the indicator variable for river 
+boston_housing_dataset <- subset(boston_housing_dataset, select = -CHAS)
 
-ols_step_forward_p(model, details = FALSE)
+train_set_indices <- createDataPartition(boston_housing_dataset$MEDV, p = 0.6, list = FALSE)
+
+train_set_dataset <- boston_housing_dataset[train_set_indices, ]
+
+test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
+
+write.csv(train_set_indices, "train_set_indices.csv", row.names = FALSE)
+
+correlation_matrix <- cor(train_set_dataset)
+
+print(correlation_matrix)
 
 ```
 
 ```{r}
-K <- ols_step_all_possible(model, details=TRUE)
 
-print(K)
+model <- lm(train_set_dataset$MEDV ~ ., data=train_set_dataset)
+
+ols_coll_diag(model)
+
+```
+
+As the VIF for all predictors in the full model were below 10, this indicates there is no multicollinearity present in the model which would require remedies, such as weighted least square regression or removing some of the highly correlated predictors. (idk whether to keep this).
+
+```{r}
+print(summary(model))
+
+stepwise_model_results <- ols_step_both_p(model, details = FALSE, p_enter = 0.10, p_remove = 0.15)
+
+print(stepwise_model_results)
+
+stepwise_model <- lm(MEDV ~ LSTAT + RM + PTRATIO + DIS + B + NX + RAD + TAX + CRIM + ZN, data = train_set_dataset)
+
+RSS <- residuals(stepwise_model)^2
+
+training_MSE <- mean(RSS)
+
+cat("Training MSE:", training_MSE, "\n")
+
+test_MSE <- mean((test_set_dataset$MEDV - predict(stepwise_model, newdata=test_set_dataset))^2)
+
+cat("Test MSE:", test_MSE)
+
+```
+
+```{r}
+anova_comparison <- anova(model, stepwise_model$model)
+print(anova_comparison)
+
+```
+
+(overall we can see that the full model with the F test (explain further) shows that the full model with all of the predictors versus the reduced model with AGE (proportion of owner-occupied units built prior to 1940) and INDUS (proportion of non-retail business acres per town))
+
+```{r}
+print(ols_step_all_possible(model, details=TRUE))
+
 
 ```
 
@@ -221,13 +273,21 @@ When looking at the statistics for the different models, we are only allowed to 
 
 ```{r}
 
-full_model=lm(y~x1+x2+x3+x4+x5,data=thermalData)
+full_model=lm(train_set_dataset$MEDV ~ .,data=train_set_dataset)
 
 anova(full_model)
 
 summary(full_model)
 
-cat("MSE: ",  mean((thermalData$y - predict(full_model, newdata=thermalData))^2))
+RSS <- residuals(full_model)^2
+
+training_MSE <- mean(RSS)
+
+cat("Training MSE:", training_MSE, "\n")
+
+test_MSE <- mean((test_set_dataset$MEDV - predict(full_model, newdata=test_set_dataset))^2)
+
+cat("Test MSE:", test_MSE)
 
 
 ```
@@ -236,13 +296,13 @@ First off, we can see that the test for significance of regression would allow u
 
 ```{r}
 
-reduced_model = lm(y~x1+x2+x3+x4,data=thermalData)
+#reduced_model = lm(y~x1+x2+x3+x4,data=thermalData)
 
-anova(reduced_model)
+#anova(reduced_model)
 
-summary(reduced_model)
+#summary(reduced_model)
 
-cat("MSE: ",  mean((thermalData$y - predict(reduced_model, newdata=thermalData))^2))
+#cat("MSE: ",  mean((thermalData$y - predict(reduced_model, newdata=thermalData))^2))
 
 ```
 
@@ -252,23 +312,27 @@ Using the information given here, I would choose the best model as the one with 
 
 Note that the 4 and 5 predictor models both have issues with the residuals that estimate the error terms indicating that normality is violated in both models.
 
-## Bayesian Linear Regression Model
-
-Messy Code:
+## Bayesian Linear Regression Model![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAaCAYAAADFTB7LAAAAcElEQVR4Xu3OwQmAQAxE0bClWYCW5N06tM6V2YPg5CjoF/JhLoHAi6iqn9eOefUbqrYvHY0cQDLyAlKRNyARmYA0ZMLRkAlGQyaU72tkAtlim7r/vJqDUDjlKBROOQyFU2icQuMUGqfQuBEaV1XPOwEx96nYACK8+wAAAABJRU5ErkJggg== "Run Current Chunk")
 
 ```{python}
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+from tabulate import tabulate
 
 #Load the data from a text file mak ethe fist row the header and use tab as the separator
-data = pd.read_csv('~/Downloads/thermalData.csv', header=0, sep=',')
+data = pd.read_csv('~/Downloads/Boston.csv', header=0, sep=',')
+
+training_indices = pd.read_csv('train_set_indices.csv', header=0, sep=',')['Resample1'].tolist()
+
+print(len(training_indices))
+# data = pd.read_csv('Boston.csv', header=0, sep=',')
 
 #Delete rows with missing values
 data = data.dropna()
 
-data.insert(1, 'intercept_term', 1)
+data.insert(0, 'Intercept', 1)
 
 num_predictors = len(data.columns) - 1
 
@@ -281,27 +345,29 @@ b = 0.001
 
 #Set the parameters for the prior distribution for mu (normal) (non-informative)
 
+
 #Create the matrix for V
 V = np.eye(num_predictors)
 m = np.zeros(num_predictors)
 
-X = data.iloc[:, 1:7].to_numpy()
-y = data.iloc[:, 0].to_numpy()
+X_training_set = data.iloc[training_indices, 0:num_predictors].to_numpy()
+y_training_set = data.iloc[training_indices, num_predictors].to_numpy()
+
+X_test_set = data.drop(training_indices, axis=0).iloc[:, 0:num_predictors].to_numpy()
+y_test_set = data.drop(training_indices, axis=0).iloc[:, num_predictors].to_numpy()
 
 #Compute the inverse of V
 V_inv = np.linalg.inv(V)
 
 #Compute the mean of the posterior distribution of beta given sigma2 (normal)
-mu_post = np.linalg.inv(X.T @ X + V_inv) @ (X.T @ y + V_inv @ m)
+mu_post = np.linalg.inv(X_training_set.T @ X_training_set + V_inv) @ (X_training_set.T @ y_training_set + V_inv @ m)
 
 #Compute the lambda matrix of the posterior distribution of beta given sigma2 (normal)
-lambda_post = np.linalg.inv(X.T @ X + V_inv)
+lambda_post = np.linalg.inv(X_training_set.T @ X_training_set + V_inv)
 
 #Compute alpha paramater of sigma2 posterior distribution (inverse gamma)
-alpha_post = a + len(y) / 2
-r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) @ mu_post + 2*b + y.T @ y) / 2
-
-print(mu_post)
+alpha_post = a + len(y_training_set) / 2
+r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) @ mu_post + 2*b + y_training_set.T @ y_training_set) / 2
 
 # Step 4: Drawing sigma2 from the inverse gamma distribution
 sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_size)
@@ -312,13 +378,17 @@ beta_hat = np.zeros((sampling_size, num_predictors))
 for i in range(sampling_size):
     beta_hat[i, :] = np.random.multivariate_normal(mu_post, lambda_post * sigma2[i])
 
-plt.hist(sigma2, bins=30, alpha=0.5, color='orange', label='Posterior of sigma^2')
+plt.hist(sigma2, bins=int(sampling_size/1000), alpha=0.5, color='orange', label='Posterior of sigma^2')
 plt.xlabel('sigma^2')
 plt.ylabel('Frequency')
+plt.title('Histogram of Simulated Posterior Distribution for Sigma^2')
 plt.legend()
 plt.show()
 
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
+print(len(data.columns[1:num_predictors]))
+#Create new dataframe
+beta_estimates = pd.DataFrame(index=data.columns[0:num_predictors], columns=["Beta Estimate", "Estimate for Standard Deviation of Beta", "95% Credible Region"])
 
 for i in range(num_predictors):
 
@@ -326,34 +396,46 @@ for i in range(num_predictors):
 
     value_at_975 = sorted_beta_hat_i[np.floor(0.975 * sampling_size).astype(int)]
     value_at_25 = sorted_beta_hat_i[np.floor(0.025 * sampling_size).astype(int)]
-    
-    print(f"Best Estimate for Beta (Beta Hat): {mu_post[i]}")
-    print(f"Best Estimate for Standard Deviation of Beta {i}: {lambda_post[i][i] * sigma2[i]}")
-    #Print the 95% credible region for beta_hat_i
-    print(f"95% credible region for Beta Hat {i}: ({value_at_25}, {value_at_975})")
-    
-for i in range(num_predictors):
-  
-    sorted_beta_hat_i = np.sort(beta_hat[:, i])
+    beta_estimates.iloc[i, 0] = mu_post[i]
+    beta_estimates.iloc[i, 1] = lambda_post[i][i] * sigma2[i]
+    beta_estimates.iloc[i, 2] = f"[{value_at_25}, {value_at_975}]"
 
-    value_at_975 = sorted_beta_hat_i[np.floor(0.975 * sampling_size).astype(int)]
-    value_at_25 = sorted_beta_hat_i[np.floor(0.025 * sampling_size).astype(int)]
+    # print(f"Best Estimate for Beta (Beta Hat) (mean/mode/median of posterior normal distribution for Beta {i}: {mu_post[i]}")
+    # print(f"Best Estimate for Standard Deviation of Beta {i}: {lambda_post[i][i] * sigma2[i]}")
+    # #Print the 95% credible region for beta_hat_i
+    # print(f"95% credible region for Beta Hat {i}: ({value_at_25}, {value_at_975})")
 
     #Create histograms for beta_hat_i
-    plt.hist(beta_hat[:, i], bins=30, color=colors(i), alpha=0.5, label=f'Posterior of Beta Hat {i}')
-    plt.axvline(x=value_at_25, color='r', linestyle='--', label='Lower 95% CR Bound')
-    plt.axvline(x=value_at_975, color='darkred', linestyle='--', label='Upper 95% CR Bound')
-    plt.axvline(x=mu_post[i], color='b', linestyle='--', label='Posterior Beta Estimate')
+    plt.hist(beta_hat[:, i], bins=int(sampling_size/1000), color=colors(i), alpha=0.5, label=f'Density of Posterior Distribution')
+    plt.axvline(x=value_at_25, color='r', linestyle='--', label='Lower 95% CR Bound for Estimate')
+    plt.axvline(x=value_at_975, color='darkred', linestyle='--', label='Upper 95% CR Bound for Estimate')
+    plt.axvline(x=mu_post[i], color='b', linestyle='--', label='Posterior Predictor Estimate')
 
-    plt.xlabel(f'Beta Hat {i}')
+    plt.xlabel(f'idk what to put here')
     plt.ylabel('Frequency')
+    plt.title(f'Histogram of Simulated Marginal Posterior Distribution and Confidence Regions for {data.columns[i]}')
     plt.legend()
+    plt.figure(figsize=(4, 3))
     plt.show()
 
-#Compute MSE
-MSE = np.mean((y - X @ mu_post)**2)
+# Get the headers of the DataFrame slice
 
-print(f"Bayesian MSE: {MSE}")
+print(tabulate(beta_estimates, headers='keys', tablefmt='grid'))
+
+#Compute MSE
+training_MSE = np.mean((y_training_set - X_training_set @ mu_post)**2)
+
+print(f"Training Set Bayesian MSE: {training_MSE}")
+
+test_MSE = np.mean((y_test_set - X_test_set @ mu_post)**2)
+
+print(f"Test Set Bayesian MSE: {test_MSE}")
+
+
+
+
+
+
 
 ```
 
@@ -365,8 +447,8 @@ print(f"Bayesian MSE: {MSE}")
 
 Note: These are not cited in proper format yet.
 
-https://en.wikipedia.org/wiki/Bayesian_linear_regression
+<https://en.wikipedia.org/wiki/Bayesian_linear_regression>
 
-https://gregorygundersen.com/blog/2020/02/04/bayesian-linear-regression/
+<https://gregorygundersen.com/blog/2020/02/04/bayesian-linear-regression/>
 
-https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18
+<https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18>
