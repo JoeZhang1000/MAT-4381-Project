@@ -79,7 +79,7 @@ From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained 
 
 ### ANOVA tests
 
-There's another way to test whether predictors are significant to the model, but instead of testing individual parameters only, we can test a subset of all parameters. This is known as the ANOVA test. 
+There's another way to test whether predictors are significant to the model, but instead of testing individual parameters only, we can test a subset of all parameters. This is known as the ANOVA test.
 
 ## Prediction
 
@@ -197,7 +197,7 @@ To simulate the marginal distribution for a parameter $\beta_j$, we can use the 
 
 # Application
 
-Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset [citation]. 
+Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset [citation].
 
 ## Data Description and Preprocessing
 
@@ -205,6 +205,7 @@ The Boston Housing dataset contains information about various factors affecting 
 
 The variables of the data are as follows:
 
+```{=tex}
 \begin{itemize}
   \item CRIM: per capita crime rate by town
   \item ZN: proportion of residential land zoned for lots over 25,000 sq.ft.
@@ -221,12 +222,12 @@ The variables of the data are as follows:
   \item LSTAT: \% lower status of the population
   \item MEDV: Median value of owner-occupied homes in \$1000s (target variable)
 \end{itemize}
-
-
+```
 Our goal is to construct a linear regression model that describes the relationship between the median value of owner-occupied homes and the factors that affect housing prices in the Boston area. We build a model using both the frequentist and the Bayesian framework. We are removing the variable CHAS because it is an indicator variable.
 
 To make things easier to read, we will be using the following notations for variables:
 
+```{=tex}
 \begin{itemize}
   \item $X_1: CRIM$
   \item $X_2: ZN$
@@ -242,7 +243,7 @@ To make things easier to read, we will be using the following notations for vari
   \item $X_{12}: LSTAT$
   \item $Y: MEDV$
 \end{itemize}
-
+```
 Dataset Source: The data were derived from information collected by the U.S. Census Service concerning housing in the area of Boston, Massachusetts.
 
 We first divide the data into training and test sets randomly:
@@ -337,6 +338,10 @@ print(anova_comparison)
 
 ## Bayesian Linear Regression Model![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAaCAYAAADFTB7LAAAAcElEQVR4Xu3OwQmAQAxE0bClWYCW5N06tM6V2YPg5CjoF/JhLoHAi6iqn9eOefUbqrYvHY0cQDLyAlKRNyARmYA0ZMLRkAlGQyaU72tkAtlim7r/vJqDUDjlKBROOQyFU2icQuMUGqfQuBEaV1XPOwEx96nYACK8+wAAAABJRU5ErkJggg== "Run Current Chunk")
 
+**Setting Prior Distribution Parameters**
+
+We must now choose the prior parameters for each of the prior distributions. We start with setting the parameters for \$\\sigma\^2 \\sim IG(a,b)\$. As we are not experts in the field of predicting home prices, we do not know the specifics of the variability of home prices in Boston. Therefore, we chose to
+
 ```{python}
 import numpy as np
 import pandas as pd
@@ -345,7 +350,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from tabulate import tabulate
 
 #Load the data from a text file mak ethe fist row the header and use tab as the separator
-data = pd.read_csv('Boston.csv', header=0, sep=',')
+data = pd.read_csv('~/Downloads/Boston.csv', header=0, sep=',')
 
 training_indices = pd.read_csv('train_set_indices.csv', header=0, sep=',')['Resample1'].tolist()
 
@@ -354,13 +359,14 @@ print(len(training_indices))
 
 #Delete rows with missing values
 data = data.dropna()
+data = data.drop('CHAS', axis=1)
 
 data.insert(0, 'Intercept', 1)
 
 num_predictors = len(data.columns) - 1
 
 #Set sampling size
-sampling_size = 1000000
+sampling_size = 100000
 
 #Set the parameters for the prior distribution for sigma2 (inverse gamma) (non-informative)
 a = 0.001
@@ -368,10 +374,10 @@ b = 0.001
 
 #Set the parameters for the prior distribution for mu (normal) (non-informative)
 
-
-#Create the matrix for V
-V = np.eye(num_predictors)
+V = np.diag([1] * num_predictors)
 m = np.zeros(num_predictors)
+
+# m = np.array([100 for i in range(num_predictors)])
 
 X_training_set = data.iloc[training_indices, 0:num_predictors].to_numpy()
 y_training_set = data.iloc[training_indices, num_predictors].to_numpy()
@@ -411,39 +417,50 @@ plt.show()
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
 print(len(data.columns[1:num_predictors]))
 #Create new dataframe
-beta_estimates = pd.DataFrame(index=data.columns[0:num_predictors], columns=["Beta Estimate", "Estimate for Standard Deviation of Beta", "95% Credible Region"])
+beta_estimates = pd.DataFrame(index=data.columns[0:num_predictors], columns=["Beta Estimate", "SD Estimate for Beta", "95% Credible Region"])
+
+fig, axes = plt.subplots(5, 3, figsize=(25, 40))
+axes = axes.flatten()
 
 for i in range(num_predictors):
-
     sorted_beta_hat_i = np.sort(beta_hat[:, i])
+    value_at_975 = round(sorted_beta_hat_i[int(np.floor(0.975 * sampling_size))], 8)
+    value_at_25 = round(sorted_beta_hat_i[int(np.floor(0.025 * sampling_size))], 8)
 
-    value_at_975 = sorted_beta_hat_i[np.floor(0.975 * sampling_size).astype(int)]
-    value_at_25 = sorted_beta_hat_i[np.floor(0.025 * sampling_size).astype(int)]
     beta_estimates.iloc[i, 0] = mu_post[i]
     beta_estimates.iloc[i, 1] = lambda_post[i][i] * sigma2[i]
     beta_estimates.iloc[i, 2] = f"[{value_at_25}, {value_at_975}]"
 
-    # print(f"Best Estimate for Beta (Beta Hat) (mean/mode/median of posterior normal distribution for Beta {i}: {mu_post[i]}")
-    # print(f"Best Estimate for Standard Deviation of Beta {i}: {lambda_post[i][i] * sigma2[i]}")
-    # #Print the 95% credible region for beta_hat_i
-    # print(f"95% credible region for Beta Hat {i}: ({value_at_25}, {value_at_975})")
+    subaxis = axes[i]
+    n, bins, patches = subaxis.hist(beta_hat[:, i], bins=int(sampling_size / 1000), color=colors(i), alpha=0.75)
+    low_cr = subaxis.axvline(x=value_at_25, color='r', linestyle='--', label = 'Lower 95% CR Bound for Estimate')
+    high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--', label = 'Upper 95% CR Bound for Estimate')
+    mean_est = subaxis.axvline(x=mu_post[i], color='b', linestyle='--', label = 'Posterior Beta Coefficient Estimate for Predictor')
 
-    #Create histograms for beta_hat_i
-    plt.hist(beta_hat[:, i], bins=int(sampling_size/1000), color=colors(i), alpha=0.5, label=f'Density of Posterior Distribution')
-    plt.axvline(x=value_at_25, color='r', linestyle='--', label='Lower 95% CR Bound for Estimate')
-    plt.axvline(x=value_at_975, color='darkred', linestyle='--', label='Upper 95% CR Bound for Estimate')
-    plt.axvline(x=mu_post[i], color='b', linestyle='--', label='Posterior Predictor Estimate')
+    subaxis.set_xlabel(f'Beta Value for Predictor {i}')
+    subaxis.set_ylabel('Frequency')
+    subaxis.set_title(f'{data.columns[i]}', fontsize=12)
 
-    plt.xlabel(f'idk what to put here')
-    plt.ylabel('Frequency')
-    plt.title(f'Histogram of Simulated Marginal Posterior Distribution and Confidence Regions for {data.columns[i]}')
-    plt.legend()
-    plt.figure(figsize=(4, 3))
-    plt.show()
+lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
+lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
+fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=18, bbox_to_anchor=(0.5, 0.96))
+
+# Add an overall title
+fig.suptitle('Marginal Posterior Distributions and Confidence Intervals for Predictors', fontsize=25, y=0.98)
+
+plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+
+for i in range(num_predictors, 15):
+    axes[i].axis('off')
+
+fig.text(0.5, 0.01, 'Figure 1', ha='center', va='bottom', fontsize=20)
+
+plt.show()
+
 
 # Get the headers of the DataFrame slice
 
-print(tabulate(beta_estimates, headers='keys', tablefmt='grid'))
+print(tabulate(beta_estimates, headers='keys', tablefmt='grid',  numalign="left", stralign="left"))
 
 #Compute MSE
 training_MSE = np.mean((y_training_set - X_training_set @ mu_post)**2)
@@ -453,12 +470,6 @@ print(f"Training Set Bayesian MSE: {training_MSE}")
 test_MSE = np.mean((y_test_set - X_test_set @ mu_post)**2)
 
 print(f"Test Set Bayesian MSE: {test_MSE}")
-
-
-
-
-
-
 
 ```
 
