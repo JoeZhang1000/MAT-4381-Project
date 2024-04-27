@@ -265,7 +265,9 @@ train_set_dataset <- boston_housing_dataset[train_set_indices, ]
 
 test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
 
-write.csv(train_set_indices, "train_set_indices.csv", row.names = FALSE)
+#For use in future Python code
+write.csv(train_set_dataset, "train_set_dataset.csv", row.names = FALSE)
+write.csv(train_set_dataset, "test_set_dataset.csv", row.names = FALSE)
 ```
 
 ## Ordinary Least Squares Model
@@ -291,6 +293,24 @@ cat("Training MSE:", training_MSE, "\n")
 test_MSE <- mean((test_set_dataset$MEDV - predict(full_model, newdata=test_set_dataset))^2)
 
 cat("Test MSE:", test_MSE)
+
+#Save model to csv file
+model_summary <- summary(full_model)$coefficients  # Extracting coefficients, std. error, t-value, and p-value
+
+# Extracting 95% confidence intervals
+conf_intervals <- confint(full_model, level = 0.95)
+
+# Creating a data frame
+results_df <- data.frame(
+  Estimate = model_summary[, "Estimate"],
+  StdError = model_summary[, "Std. Error"],
+  Lower95CI = conf_intervals[, "2.5 %"],
+  Upper95CI = conf_intervals[, "97.5 %"]
+)
+
+# Save to CSV
+write.csv(results_df, "full_model_summary.csv", row.names = TRUE)
+
 ```
 
 We have that the full frequentist linear regression model fitted using the training dataset is $Y = 32.044484 - 0.121517 X_1 + 0.042545 X_2 + 0.066926 X_3 - 13.994681 X_4 + 4.021977 X_5 - 0.004531 X_6 - 1.469667 X_7 + 0.343192 X_8 - 0.014404 X_9 - 0.855679 X_{10} + 0.011628 X_{11} - 0.0629198 X_{12}$, where the variables are as described in the previous section. From looking at the summary table of the model, we see that the variables $X_3$ (INDUS) and $X_6$ (AGE) are not statistically significant under the significance level $\alpha = 0.05$ because the p-values from the t tests are greater than 0.05. From the ANOVA table, we can see that given the variables $X_1$ (CRIM), $X_2$ (ZN), and $X_3$ (INDUS), we have that adding $X_4$ (NX) is not significant to the model. We also have that given the variables $X_1$ (CRIM), $X_2$ (ZN), $X_3$ (INDUS), $X_4$ (NX), and $X_5$ (RM), $X_6$ (AGE) is not significant. We also have that given the variables $X_1$ (CRIM), $X_2$ (ZN), $X_3$ (INDUS), $X_4$ (NX), $X_5$ (RM), $X_6$ (AGE), and $X_7$ (DIS), $X_8$ (RAD) is not significant to the model.
@@ -340,7 +360,7 @@ print(anova_comparison)
 
 **Setting Prior Distribution Parameters**
 
-We must now choose the prior parameters for each of the prior distributions. We start with setting the parameters for \$\\sigma\^2 \\sim IG(a,b)\$. As we are not experts in the field of predicting home prices, we do not know the specifics of the variability of home prices in Boston. Therefore, we chose to
+We must now choose the prior parameters for each of the prior distributions. We start with setting the parameters for \$\\sigma^2 \\sim IG(a,b)\$. As we are not experts in the field of predicting home prices, we do not know the specifics of the variability of home prices in Boston. Therefore, we chose to set the prior for^ $\sigma^2$ to a non-informative prior. We decided to choose the $IG(1,1)$ prior for $\sigma^2$ as we believe that $\sigma^2$ is mostly likely small due to the high quality source of the data, but there might be ....
 
 ```{python}
 import numpy as np
@@ -348,25 +368,16 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from tabulate import tabulate
+import random
 
-#Load the data from a text file mak ethe fist row the header and use tab as the separator
-data = pd.read_csv('~/Downloads/Boston.csv', header=0, sep=',')
+#Set the random seed to make the code reproducible
+random.seed(1)
 
-training_indices = pd.read_csv('train_set_indices.csv', header=0, sep=',')['Resample1'].tolist()
+#Load the training and test data that has been preprocessed
+train_set = pd.read_csv('train_set_dataset.csv', header=0, sep=',')
+test_set = pd.read_csv('test_set_dataset.csv', header=0, sep=',')
 
-print(len(training_indices))
-# data = pd.read_csv('Boston.csv', header=0, sep=',')
-
-#Delete rows with missing values
-data = data.dropna()
-data = data.drop('CHAS', axis=1)
-
-data.insert(0, 'Intercept', 1)
-
-num_predictors = len(data.columns) - 1
-
-#Set sampling size
-sampling_size = 100000
+num_predictors = len(train_set.columns)
 
 #Set the parameters for the prior distribution for sigma2 (inverse gamma) (non-informative)
 a = 0.001
@@ -379,11 +390,25 @@ m = np.zeros(num_predictors)
 
 # m = np.array([100 for i in range(num_predictors)])
 
-X_training_set = data.iloc[training_indices, 0:num_predictors].to_numpy()
-y_training_set = data.iloc[training_indices, num_predictors].to_numpy()
+```
 
-X_test_set = data.drop(training_indices, axis=0).iloc[:, 0:num_predictors].to_numpy()
-y_test_set = data.drop(training_indices, axis=0).iloc[:, num_predictors].to_numpy()
+**Algorithm**
+
+We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{0, 1, \dots, 13\}$, with the $i^{th}$ $\beta$ corresponding to the $i^{th}$ predictor ($X_i$).
+
+```{python}
+
+train_set.insert(0, 'Intercept', 1)
+test_set.insert(0, 'Intercept', 1)
+
+X_training_set = train_set.iloc[:, 0:num_predictors].to_numpy()
+y_training_set = train_set.iloc[:, num_predictors].to_numpy()
+
+X_test_set = test_set.iloc[:, 0:num_predictors].to_numpy()
+y_test_set = test_set.iloc[:, num_predictors].to_numpy()
+
+#Set sampling size
+sampling_size = 1000000
 
 #Compute the inverse of V
 V_inv = np.linalg.inv(V)
@@ -404,9 +429,17 @@ sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_siz
 #Create the vector for beta_hat
 beta_hat = np.zeros((sampling_size, num_predictors))
 
+#Sample the joint posterior distributions for the Beta coefficients
 for i in range(sampling_size):
     beta_hat[i, :] = np.random.multivariate_normal(mu_post, lambda_post * sigma2[i])
 
+```
+
+**Plots**
+
+```{python}
+
+#Plot for posterior distribution for sigma^2
 plt.hist(sigma2, bins=int(sampling_size/1000), alpha=0.5, color='orange', label='Posterior of sigma^2')
 plt.xlabel('sigma^2')
 plt.ylabel('Frequency')
@@ -415,11 +448,10 @@ plt.legend()
 plt.show()
 
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
-print(len(data.columns[1:num_predictors]))
 #Create new dataframe
-beta_estimates = pd.DataFrame(index=data.columns[0:num_predictors], columns=["Beta Estimate", "SD Estimate for Beta", "95% Credible Region"])
+beta_estimates = pd.DataFrame(index=train_set.columns[0:num_predictors], columns=["Beta Estimate", "SD Estimate for Beta", "95% Credible Region"])
 
-fig, axes = plt.subplots(5, 3, figsize=(25, 40))
+fig, axes = plt.subplots(5, 3, figsize=(35, 43))
 axes = axes.flatten()
 
 for i in range(num_predictors):
@@ -432,36 +464,55 @@ for i in range(num_predictors):
     beta_estimates.iloc[i, 2] = f"[{value_at_25}, {value_at_975}]"
 
     subaxis = axes[i]
-    n, bins, patches = subaxis.hist(beta_hat[:, i], bins=int(sampling_size / 1000), color=colors(i), alpha=0.75)
-    low_cr = subaxis.axvline(x=value_at_25, color='r', linestyle='--', label = 'Lower 95% CR Bound for Estimate')
-    high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--', label = 'Upper 95% CR Bound for Estimate')
-    mean_est = subaxis.axvline(x=mu_post[i], color='b', linestyle='--', label = 'Posterior Beta Coefficient Estimate for Predictor')
+    n, bins, patches = subaxis.hist(beta_hat[:, i], bins=int(sampling_size / 1000), color=colors(i), alpha=1)
+    low_cr = subaxis.axvline(x=value_at_25, color='r', linestyle='--', linewidth=5, label = 'Lower 95% CR Bound for Estimate')
+    high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
+    mean_est = subaxis.axvline(x=mu_post[i], color='b', linestyle='--', linewidth=5, label = 'Posterior Beta Coefficient Estimate for Predictor')
 
-    subaxis.set_xlabel(f'Beta Value for Predictor {i}')
-    subaxis.set_ylabel('Frequency')
-    subaxis.set_title(f'{data.columns[i]}', fontsize=12)
+    subaxis.set_xlabel(f'Predictor {i} Value', fontsize = 25)
+    subaxis.set_ylabel('Frequency', fontsize=25)
+    subaxis.set_title(f'X_{i} ({train_set.columns[i])}', fontsize=35)
+    subaxis.tick_params(axis='both', which='major', labelsize=20)
 
 lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
 lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=18, bbox_to_anchor=(0.5, 0.96))
+fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=35, bbox_to_anchor=(0.5, 0.94))
 
-# Add an overall title
-fig.suptitle('Marginal Posterior Distributions and Confidence Intervals for Predictors', fontsize=25, y=0.98)
+fig.suptitle('Marginal Posterior Distributions and Confidence Intervals for Predictors', fontsize=60, y=0.98)
 
-plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+plt.tight_layout(rect=[0, 0, 1, 0.92])
 
 for i in range(num_predictors, 15):
     axes[i].axis('off')
 
-fig.text(0.5, 0.01, 'Figure 1', ha='center', va='bottom', fontsize=20)
+# fig.text(0.5, 0.01, 'Figure 1', ha='center', va='bottom', fontsize=20)
 
 plt.show()
 
+print(beta_estimates)
 
-# Get the headers of the DataFrame slice
+```
 
-print(tabulate(beta_estimates, headers='keys', tablefmt='grid',  numalign="left", stralign="left"))
+Figure 1: Bayesian Posterior Distribution Graphs
 
+```{=latex}
+```
+**Results**
+
+```{python}
+bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+
+with open('bayesian_results.tex', 'w') as f:
+    f.write(bayesian_results)
+```
+
+```{=latex}
+\input{bayesian_results.tex}
+\\
+Table 1: Bayesian Posterior Estimates Summary \\
+```
+
+```{python}
 #Compute MSE
 training_MSE = np.mean((y_training_set - X_training_set @ mu_post)**2)
 
@@ -470,10 +521,93 @@ print(f"Training Set Bayesian MSE: {training_MSE}")
 test_MSE = np.mean((y_test_set - X_test_set @ mu_post)**2)
 
 print(f"Test Set Bayesian MSE: {test_MSE}")
-
 ```
 
+We can see that the training MSE of our Bayesian model on a training set is around 20, while the test MSE is much higher at around 28. This could indicate slight overfitting in the training data (as we did not remove non-significant predictors in our final model).
+
 ## Comparison Between Models
+
+We will now compare the $\sigma^2$ estimates between the OLS and Bayesian method:
+
+```{python}
+bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+
+with open('sigma2_comparison.tex', 'w') as f:
+    f.write(bayesian_results)
+```
+
+```{python}
+bayesian_beta_estimates = beta_estimates.drop("SD Estimate for Beta", axis=1)
+OLS_beta_estimates = pd.read_csv('full_model_summary.csv', index_col=0).rename(index={'(Intercept)': 'Intercept'})
+
+beta_estimates_comparison = bayesian_beta_estimates.rename(columns={'Beta Estimate': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
+
+beta_estimates_comparison['Beta Estimate Difference (OLS - Bayesian)'] = bayesian_beta_estimates['Beta Estimate'] - OLS_beta_estimates['Estimate']
+beta_estimates_comparison.insert(0, 'OLS Beta Estimate', OLS_beta_estimates['Estimate'])
+
+beta_estimates_table = tabulate(beta_estimates_comparison, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+
+with open('beta_estimates.tex', 'w') as f:
+    f.write(beta_estimates_table)
+    
+```
+
+```{python}
+
+beta_extra_info = pd.DataFrame()
+beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['StdError']
+beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
+
+OLS_beta_estimates['Lower95CI'] = OLS_beta_estimates['Lower95CI'].round(6)
+OLS_beta_estimates['Upper95CI'] = OLS_beta_estimates['Upper95CI'].round(6)
+beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['Lower95CI'].astype(str) + ', ' + OLS_beta_estimates['Upper95CI'].astype(str) + ']'
+
+beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
+
+sd_beta_table = tabulate(beta_extra_info.iloc[:, 0:2], headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+
+with open('sd_beta_table.tex', 'w') as f:
+    f.write(sd_beta_table)
+    
+```
+
+```{python}
+
+beta_extra_info = pd.DataFrame()
+beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['StdError']
+beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
+
+beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
+
+OLS_beta_estimates['Lower95CI'] = OLS_beta_estimates['Lower95CI'].round(6)
+OLS_beta_estimates['Upper95CI'] = OLS_beta_estimates['Upper95CI'].round(6)
+beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['Lower95CI'].astype(str) + ', ' + OLS_beta_estimates['Upper95CI'].astype(str) + ']'
+
+beta_95_CI_CR_table = tabulate(beta_extra_info.iloc[:, 2:], headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+
+with open('beta_95_CI_CR_table.tex', 'w') as f:
+    f.write(beta_95_CI_CR_table)
+    
+```
+
+```{=latex}
+\input{sigma2_comparison.tex}
+\\
+Table 2: $\sigma^2$ Results Comparison between OLS and Bayesian method \\
+```
+
+```{=latex}
+\input{sd_beta_table.tex}
+\\
+Table 3: $\beta$ Coefficient Standard Deviation Estimates Comparison between OLS and Bayesian method
+```
+
+```{=latex}
+\input{beta_95_CI_CR_table.tex}
+\\
+
+Table 4: $\beta$ Coefficient Estimates 95% Confidence Intervals/Credible Region Comparison between OLS and Bayesian method
+```
 
 # Conclusion
 
