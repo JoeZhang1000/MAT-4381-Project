@@ -17,7 +17,7 @@ Linear regression is often used to model relationships between a response variab
 
 # Introduction
 
-To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors with each observation, $n$ is the number of observations, and $k$ is the number of parameters. The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have
+To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors associated with each observation, $n$ is the number of observations, and $k$ is the number of predictors The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have
 
 $$\boldsymbol{y} = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix} \text{, } \quad X = \begin{bmatrix} 1 & x_{11} & x_{12} & \cdots & x_{1k} \\ 1 & x_{21} & x_{22} & \cdots & x_{2k} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 1 & x_{n1} & x_{n2} & \cdots & x_{nk} \end{bmatrix} \text{, } \quad \boldsymbol{\beta} = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_{k-1} \end{bmatrix} \text{, } \quad \boldsymbol{\epsilon} = \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n \end{bmatrix}$$
 
@@ -27,7 +27,7 @@ The most well-known way is to use the ordinary least squares method to estimate 
 
 ## Estimation of Model Parameters
 
-Consider a multiple linear regression model $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ assume that the random errors have mean 0, variance $\sigma^2$, are uncorrelated, and they follow a normal distribution. In other words, we assume that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$, where $\boldsymbol{0}$ is the zero vector, and $I$ is the identity matrix.
+Consider a multiple linear regression model $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ assuming that the random errors have mean 0, variance $\sigma^2$, are uncorrelated, and follow a normal distribution. In other words, we assume that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$, where $\boldsymbol{0}$ is the zero vector, and $I$ is the identity matrix.
 
 To estimate the coefficients, the following quantity should be minimized: $$S(\boldsymbol{\beta}) = \sum_{i = 1}^{n} \epsilon_i = \boldsymbol{\epsilon}^T\boldsymbol{\epsilon} = (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta})$$
 
@@ -57,9 +57,9 @@ Therefore, an unbiased estimator for $\sigma^2$ is given by $$\hat{\sigma^2} = M
 
 ## Inference on model parameters
 
-### t tests
+### t-tests
 
-After obtaining the estimates of the model parameters, we need to make inference on them. The main goal of inference is to determine if all the explanatory variables are significant to the model. Sometimes when there are too many variables, the accuracy of predictions using the model can decrease significantly. Making inferences can help decide if some variables should not be included in the model.
+After obtaining the estimates of the model parameters, we need to make inference on them. The main goal of inference is to determine if all the explanatory variables are significant to the model. Sometimes when there are too many variables, the accuracy of predictions using the model can decrease significantly. Making inferences can help decide if some variables should not be included in the final model.
 
 We have assumed that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$. This consequently leads to that $\boldsymbol{y} \sim N(X\boldsymbol{\beta}, \sigma^2I)$. Under this assumption, we can also get that $$\hat{\boldsymbol{\beta}} \sim N(\boldsymbol{\beta}, \sigma^2(X^TX)^{-1})$$
 
@@ -79,13 +79,13 @@ From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained 
 
 ### ANOVA tests
 
-There's another way to test whether predictors are significant to the model, but instead of testing individual parameters only, we can test a subset of all parameters. This is known as the ANOVA test.
+There's another way to test whether predictors are significant to the model, but instead of testing individual parameters only, we can test a subset of all parameters. This is known as the ANOVA test. We won't explore this in detail as this is not the primary topic of this paper.
 
 ## Prediction
 
 The purpose of constructing a model between a response variable and several explanatory variables is to make predictions of future values of the response given certain values of the explanatory variables. To predict $\boldsymbol{y}$ at a given $X$, we simply use the fitted model $$\hat{\boldsymbol{y}} = X\hat{\boldsymbol{\beta}}$$
 
-To construct a confidence interval for a prediction, we have that
+To construct a confidence interval for a prediction, we have that 
 
 # Bayesian Linear Regression
 
@@ -103,7 +103,7 @@ Therefore, the likelihood function is $$f(\boldsymbol{y}| X, \boldsymbol{\beta},
 
 ### Choosing a prior distribution
 
-To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumption we will use are $$\boldsymbol{\beta}|\sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2V)$$ and $$\sigma^2 \sim IG(a, b)$$ where $\boldsymbol{m}$ is a $k \times 1$ vector of real numbers, $V$ is a $k \times k$ matrix of real numbers, and $a$ and $b$ are both real numbers.
+To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumptions we will use are $$\boldsymbol{\beta}|\sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2V)$$ and $$\sigma^2 \sim IG(a, b)$$ where $\boldsymbol{m}$ is a $k \times 1$ vector of real numbers, $V$ is a $k \times k$ matrix of real numbers, and $a$ and $b$ are both real numbers.
 
 Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsymbol{\beta}, \sigma^2) = g(\boldsymbol{\beta} | \sigma^2)g(\sigma^2)$$ where $$g(\boldsymbol{\beta}|\sigma^2) = \frac{1}{(2\pi \sigma^2)^{k/2}}|V|^{-\frac{k}{2}} \exp \left(-\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right)$$ and $$g(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-(a+1)} \exp \left( -\frac{b}{\sigma^2} \right)$$
 
@@ -177,7 +177,7 @@ The main goal is to estimate the parameters. We first need to find the marginal 
 
 To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$. Then the marginal distribution for $\beta_j$ is $$h(\beta_j| \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\beta_j | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X)\, d(\sigma^2)$$ This integral is also hard to compute, so we need to use computational methods.
 
-Given the marginal distribution, we can use it to find the mean and variance of $\beta_j$ and we can also construct credible regions to decide if the explanatory variable associated with the parameter is significant to the model. A $100(1 - \alpha)\%$ credible region for a parameter $\beta_j$ is the region $I$ such that $P(\beta_j \in I | \text{Data}) = 1 - \alpha$. There are many different such regions, but our goal is to find the shortest credible region since we want a more accurate estimate. If the credible region contain 0, this means that there is a $1-\alpha$ probability that 0 is contained in the region. If $1 - \alpha$ is very large, we can conclude that the parameter and its associated explanatory variable is not significant to the model. Otherwise, we conclude that it is significant.
+Given the marginal distribution, we can use it to find the mean and variance of $\beta_j$ and we can also construct credible regions to decide if the explanatory variable associated with the parameter is significant to the model. A $100(1 - \alpha)\%$ credible region for a parameter $\beta_j$ is the region $I$ such that $P(\beta_j \in I | \text{Data}) = 1 - \alpha$. There are many different such regions, but our goal is to find the shortest credible region since we want a more accurate estimate. If the $95\%$ credible region contains 0, then we can conclude that the parameter and its associated explanatory variable is not significant to the model. Otherwise, we conclude that it is significant.
 
 ## Simulation Algorithm to Compute Posterior
 
@@ -267,7 +267,7 @@ test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
 
 #For use in future Python code
 write.csv(train_set_dataset, "train_set_dataset.csv", row.names = FALSE)
-write.csv(train_set_dataset, "test_set_dataset.csv", row.names = FALSE)
+write.csv(test_set_dataset, "test_set_dataset.csv", row.names = FALSE)
 ```
 
 ## Ordinary Least Squares Model
@@ -294,41 +294,35 @@ test_MSE <- mean((test_set_dataset$MEDV - predict(full_model, newdata=test_set_d
 
 cat("Test MSE:", test_MSE)
 
-#Save model to csv file
-model_summary <- summary(full_model)$coefficients  # Extracting coefficients, std. error, t-value, and p-value
-
-# Extracting 95% confidence intervals
-conf_intervals <- confint(full_model, level = 0.95)
-
-# Creating a data frame
-results_df <- data.frame(
-  Estimate = model_summary[, "Estimate"],
-  StdError = model_summary[, "Std. Error"],
-  Lower95CI = conf_intervals[, "2.5 %"],
-  Upper95CI = conf_intervals[, "97.5 %"]
-)
-
-# Save to CSV
-write.csv(results_df, "full_model_summary.csv", row.names = TRUE)
-
 ```
 
+
 We have that the full frequentist linear regression model fitted using the training dataset is $Y = 32.044484 - 0.121517 X_1 + 0.042545 X_2 + 0.066926 X_3 - 13.994681 X_4 + 4.021977 X_5 - 0.004531 X_6 - 1.469667 X_7 + 0.343192 X_8 - 0.014404 X_9 - 0.855679 X_{10} + 0.011628 X_{11} - 0.0629198 X_{12}$, where the variables are as described in the previous section. From looking at the summary table of the model, we see that the variables $X_3$ (INDUS) and $X_6$ (AGE) are not statistically significant under the significance level $\alpha = 0.05$ because the p-values from the t tests are greater than 0.05. From the ANOVA table, we can see that given the variables $X_1$ (CRIM), $X_2$ (ZN), and $X_3$ (INDUS), we have that adding $X_4$ (NX) is not significant to the model. We also have that given the variables $X_1$ (CRIM), $X_2$ (ZN), $X_3$ (INDUS), $X_4$ (NX), and $X_5$ (RM), $X_6$ (AGE) is not significant. We also have that given the variables $X_1$ (CRIM), $X_2$ (ZN), $X_3$ (INDUS), $X_4$ (NX), $X_5$ (RM), $X_6$ (AGE), and $X_7$ (DIS), $X_8$ (RAD) is not significant to the model.
+
+
+```{r}
+full_model_summary <- summary(full_model)$coefficients
+
+write.csv(data.frame(
+  betaEstimate = full_model_summary[, "Estimate"],
+  standardError = full_model_summary[, "Std. Error"],
+  lower95CIBound = confint(full_model, level = 0.95)[, "2.5 %"],
+  upper95CIBound = confint(full_model, level = 0.95)[, "97.5 %"]), "full_model_summary.csv", row.names = TRUE)
+
+```
 
 We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547.
 
 Now, we build a reduced linear regression model using stepwise selection:
 
 ```{r}
-#print(summary(model))
 
 stepwise_model_results <- ols_step_both_p(full_model, details = FALSE, p_enter = 0.10, p_remove = 0.15)
 
 print(stepwise_model_results)
 
-#stepwise_model <- lm(MEDV ~ LSTAT + RM + PTRATIO + DIS + B + NX + RAD + TAX + CRIM + ZN, data = train_set_dataset)
-
-stepwise_model <- lm(MEDV ~ CRIM + ZN + NX + RM + DIS + RAD + TAX + PTRATIO + B + LSTAT, data = train_set_dataset)
+stepwise_model <- lm(MEDV ~ CRIM + ZN + NX + RM + DIS + RAD + TAX + PTRATIO + B + LSTAT, 
+                     data = train_set_dataset)
 
 summary(stepwise_model)
 
@@ -345,7 +339,7 @@ cat("Test MSE:", test_MSE)
 
 We have that the reduced model selected via stepwise regression is $Y = 31.665 - 0.0.123X_1 + 0.043X_2 - 13.171578X_4 + 3.951521X_5 -1.507618X_7 + 0.325008 X_8 - 0.012985 X_9 - 0.823535 X_{10} + 0.011428 X_{11} - 0.626362X_{12}$. All predictors are statistically significant in this model based on the t tests.
 
-After evaluating the model, we obtain that the training error is 21.73032 and the test error is 24.52705. This is similar to the full model.
+After evaluating the model, we obtain that the training error is 21.73032 and the test error is 24.52705. This is similar to the full model, indicating that the reduced model explains as well as the full model the median value of homes in Boston. If we look at the $R^2_{adj}$ values for the reduced vs full model, we can see that the value for the full model is $0.7193$ and the value for the reduced model is $72\%$. This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly worse than the reduced model.
 
 ```{r}
 #anova_comparison <- anova(model, stepwise_model$model)
@@ -356,11 +350,15 @@ print(anova_comparison)
 
 (overall we can see that the full model with the F test (explain further) shows that the full model with all of the predictors versus the reduced model with AGE (proportion of owner-occupied units built prior to 1940) and INDUS (proportion of non-retail business acres per town))
 
-## Bayesian Linear Regression Model![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAaCAYAAADFTB7LAAAAcElEQVR4Xu3OwQmAQAxE0bClWYCW5N06tM6V2YPg5CjoF/JhLoHAi6iqn9eOefUbqrYvHY0cQDLyAlKRNyARmYA0ZMLRkAlGQyaU72tkAtlim7r/vJqDUDjlKBROOQyFU2icQuMUGqfQuBEaV1XPOwEx96nYACK8+wAAAABJRU5ErkJggg== "Run Current Chunk")
+## Bayesian Linear Regression Model
 
 **Setting Prior Distribution Parameters**
 
-We must now choose the prior parameters for each of the prior distributions. We start with setting the parameters for \$\\sigma^2 \\sim IG(a,b)\$. As we are not experts in the field of predicting home prices, we do not know the specifics of the variability of home prices in Boston. Therefore, we chose to set the prior for^ $\sigma^2$ to a non-informative prior. We decided to choose the $IG(1,1)$ prior for $\sigma^2$ as we believe that $\sigma^2$ is mostly likely small due to the high quality source of the data, but there might be ....
+We must now choose the prior parameters for each of the prior distributions. 
+
+For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $10I$. Now, when we set the means to 0 and $V$ to $\lambda I$, where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the estimates for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occur towards 0. The purpose of this is to attempt to not overfit the training data and be able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=2$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
+
+We start with setting the parameters for \$\\sigma^2 \\sim IG(a,b)\$. As we are not experts in the field of predicting home prices, we do not know the specifics of the variability of home prices in Boston. Therefore, we chose to set the prior for^ $\sigma^2$ to a non-informative prior. We decided to choose the $IG(1,1)$ prior for $\sigma^2$ as we believe that $\sigma^2$ is mostly likely small due to the high quality source of the data, but there might be ....
 
 ```{python}
 import numpy as np
@@ -385,16 +383,15 @@ b = 0.001
 
 #Set the parameters for the prior distribution for mu (normal) (non-informative)
 
-V = np.diag([1] * num_predictors)
+V = np.diag([20] * num_predictors)
 m = np.zeros(num_predictors)
 
 # m = np.array([100 for i in range(num_predictors)])
-
 ```
 
 **Algorithm**
 
-We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{0, 1, \dots, 13\}$, with the $i^{th}$ $\beta$ corresponding to the $i^{th}$ predictor ($X_i$).
+We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{1, \dots, 12\}$, with the $i^{th}$ $\beta$ corresponding to the $i^{th}$ predictor ($X_i$) ($\beta_0$/$X_0$ is intercept term).
 
 ```{python}
 
@@ -408,7 +405,7 @@ X_test_set = test_set.iloc[:, 0:num_predictors].to_numpy()
 y_test_set = test_set.iloc[:, num_predictors].to_numpy()
 
 #Set sampling size
-sampling_size = 1000000
+sampling_size = 30000
 
 #Compute the inverse of V
 V_inv = np.linalg.inv(V)
@@ -423,10 +420,9 @@ lambda_post = np.linalg.inv(X_training_set.T @ X_training_set + V_inv)
 alpha_post = a + len(y_training_set) / 2
 r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) @ mu_post + 2*b + y_training_set.T @ y_training_set) / 2
 
-# Step 4: Drawing sigma2 from the inverse gamma distribution
+# Draw sigma2 from the inverse gamma distribution
 sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_size)
 
-#Create the vector for beta_hat
 beta_hat = np.zeros((sampling_size, num_predictors))
 
 #Sample the joint posterior distributions for the Beta coefficients
@@ -438,7 +434,6 @@ for i in range(sampling_size):
 **Plots**
 
 ```{python}
-
 #Plot for posterior distribution for sigma^2
 plt.hist(sigma2, bins=int(sampling_size/1000), alpha=0.5, color='orange', label='Posterior of sigma^2')
 plt.xlabel('sigma^2')
@@ -448,12 +443,13 @@ plt.legend()
 plt.show()
 
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
-#Create new dataframe
+
 beta_estimates = pd.DataFrame(index=train_set.columns[0:num_predictors], columns=["Beta Estimate", "SD Estimate for Beta", "95% Credible Region"])
 
 fig, axes = plt.subplots(5, 3, figsize=(35, 43))
 axes = axes.flatten()
 
+#Create the graphs
 for i in range(num_predictors):
     sorted_beta_hat_i = np.sort(beta_hat[:, i])
     value_at_975 = round(sorted_beta_hat_i[int(np.floor(0.975 * sampling_size))], 8)
@@ -469,38 +465,36 @@ for i in range(num_predictors):
     high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
     mean_est = subaxis.axvline(x=mu_post[i], color='b', linestyle='--', linewidth=5, label = 'Posterior Beta Coefficient Estimate for Predictor')
 
-    subaxis.set_xlabel(f'Predictor {i} Value', fontsize = 25)
+    subaxis.set_xlabel(f'Beta {i} Value', fontsize = 25)
     subaxis.set_ylabel('Frequency', fontsize=25)
-    subaxis.set_title(f'X_{i} ({train_set.columns[i])}', fontsize=35)
+    subaxis.set_title(f'X_{i} ({train_set.columns[i]})', fontsize=35)
     subaxis.tick_params(axis='both', which='major', labelsize=20)
 
 lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
 lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
 fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=35, bbox_to_anchor=(0.5, 0.94))
 
-fig.suptitle('Marginal Posterior Distributions and Confidence Intervals for Predictors', fontsize=60, y=0.98)
+fig.suptitle('Simulated Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors', fontsize=60, y=0.98)
 
 plt.tight_layout(rect=[0, 0, 1, 0.92])
 
 for i in range(num_predictors, 15):
     axes[i].axis('off')
 
-# fig.text(0.5, 0.01, 'Figure 1', ha='center', va='bottom', fontsize=20)
-
 plt.show()
-
-print(beta_estimates)
 
 ```
 
-Figure 1: Bayesian Posterior Distribution Graphs
+Figure 1: Simulated Bayesian Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors
 
 ```{=latex}
 ```
+
 **Results**
 
 ```{python}
-bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',  
+                            numalign="left", stralign="left")
 
 with open('bayesian_results.tex', 'w') as f:
     f.write(bayesian_results)
@@ -509,8 +503,11 @@ with open('bayesian_results.tex', 'w') as f:
 ```{=latex}
 \input{bayesian_results.tex}
 \\
-Table 1: Bayesian Posterior Estimates Summary \\
+\\
+Table 1: Bayesian Posterior Beta Coefficients Estimates Summary \\
 ```
+
+Write here
 
 ```{python}
 #Compute MSE
@@ -527,14 +524,7 @@ We can see that the training MSE of our Bayesian model on a training set is arou
 
 ## Comparison Between Models
 
-We will now compare the $\sigma^2$ estimates between the OLS and Bayesian method:
-
-```{python}
-bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
-
-with open('sigma2_comparison.tex', 'w') as f:
-    f.write(bayesian_results)
-```
+We will now compare the two methods based on their estimates for the $\beta$ coefficients and $\sigma^2$:
 
 ```{python}
 bayesian_beta_estimates = beta_estimates.drop("SD Estimate for Beta", axis=1)
@@ -542,8 +532,8 @@ OLS_beta_estimates = pd.read_csv('full_model_summary.csv', index_col=0).rename(i
 
 beta_estimates_comparison = bayesian_beta_estimates.rename(columns={'Beta Estimate': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
 
-beta_estimates_comparison['Beta Estimate Difference (OLS - Bayesian)'] = bayesian_beta_estimates['Beta Estimate'] - OLS_beta_estimates['Estimate']
-beta_estimates_comparison.insert(0, 'OLS Beta Estimate', OLS_beta_estimates['Estimate'])
+beta_estimates_comparison['Beta Estimate Difference (OLS - Bayesian)'] = bayesian_beta_estimates['Beta Estimate'] - OLS_beta_estimates['betaEstimate']
+beta_estimates_comparison.insert(0, 'OLS Beta Estimate', OLS_beta_estimates['betaEstimate'])
 
 beta_estimates_table = tabulate(beta_estimates_comparison, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
 
@@ -555,12 +545,12 @@ with open('beta_estimates.tex', 'w') as f:
 ```{python}
 
 beta_extra_info = pd.DataFrame()
-beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['StdError']
+beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['standardError']
 beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
 
-OLS_beta_estimates['Lower95CI'] = OLS_beta_estimates['Lower95CI'].round(6)
-OLS_beta_estimates['Upper95CI'] = OLS_beta_estimates['Upper95CI'].round(6)
-beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['Lower95CI'].astype(str) + ', ' + OLS_beta_estimates['Upper95CI'].astype(str) + ']'
+OLS_beta_estimates['lower95CIBound'] = OLS_beta_estimates['lower95CIBound'].round(6)
+OLS_beta_estimates['upper95CIBound'] = OLS_beta_estimates['upper95CIBound'].round(6)
+beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['lower95CIBound'].astype(str) + ', ' + OLS_beta_estimates['upper95CIBound'].astype(str) + ']'
 
 beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
 
@@ -574,14 +564,14 @@ with open('sd_beta_table.tex', 'w') as f:
 ```{python}
 
 beta_extra_info = pd.DataFrame()
-beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['StdError']
+beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['standardError']
 beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
 
 beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
 
-OLS_beta_estimates['Lower95CI'] = OLS_beta_estimates['Lower95CI'].round(6)
-OLS_beta_estimates['Upper95CI'] = OLS_beta_estimates['Upper95CI'].round(6)
-beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['Lower95CI'].astype(str) + ', ' + OLS_beta_estimates['Upper95CI'].astype(str) + ']'
+OLS_beta_estimates['lower95CIBound'] = OLS_beta_estimates['lower95CIBound'].round(6)
+OLS_beta_estimates['upper95CIBound'] = OLS_beta_estimates['upper95CIBound'].round(6)
+beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['lower95CIBound'].astype(str) + ', ' + OLS_beta_estimates['upper95CIBound'].astype(str) + ']'
 
 beta_95_CI_CR_table = tabulate(beta_extra_info.iloc[:, 2:], headers='keys', tablefmt='latex',  numalign="left", stralign="left")
 
@@ -591,9 +581,9 @@ with open('beta_95_CI_CR_table.tex', 'w') as f:
 ```
 
 ```{=latex}
-\input{sigma2_comparison.tex}
+\input{beta_estimates.tex}
 \\
-Table 2: $\sigma^2$ Results Comparison between OLS and Bayesian method \\
+Table 2: $\beta$ Coefficient Estimates Comparison between OLS and Bayesian method
 ```
 
 ```{=latex}
@@ -602,6 +592,8 @@ Table 2: $\sigma^2$ Results Comparison between OLS and Bayesian method \\
 Table 3: $\beta$ Coefficient Standard Deviation Estimates Comparison between OLS and Bayesian method
 ```
 
+Write here 
+
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
 \\
@@ -609,7 +601,13 @@ Table 3: $\beta$ Coefficient Standard Deviation Estimates Comparison between OLS
 Table 4: $\beta$ Coefficient Estimates 95% Confidence Intervals/Credible Region Comparison between OLS and Bayesian method
 ```
 
-# Conclusion
+Write here
+
+Compare the estimates for $\sigma^2$ between OLS and Bayesian methods here.
+
+# Conclusion/Future Steps
+
+All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. With the Bayesian model, we could further explore ....
 
 # References
 
