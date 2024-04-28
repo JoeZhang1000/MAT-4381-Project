@@ -259,14 +259,6 @@ test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
 
 #For use in future Python code
 write.csv(train_set_dataset, "train_set_dataset.csv", row.names = FALSE)
-
-ggplot(boston_housing_dataset, aes(x = MEDV)) +
-  geom_histogram(bins = 30, fill = "blue", color = "black") + # Increased number of bins
-  labs(title = "Histogram of MEDV with More Bins",
-       x = "Median Value of Homes ($1000s)",
-       y = "Frequency") +
-  theme_minimal()
-
 write.csv(test_set_dataset, "test_set_dataset.csv", row.names = FALSE)
 ```
 
@@ -443,7 +435,7 @@ for i in range(sampling_size):
 
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
 
-beta_estimates = pd.DataFrame(index=train_set.columns[0:num_predictors], columns=["Beta Estimate", "SD Estimate for Beta", "95% Credible Region"])
+beta_estimates = pd.DataFrame(index=train_set.columns[0:num_predictors], columns=["Beta Estimate", "95% Credible Region"])
 
 fig, axes = plt.subplots(5, 3, figsize=(35, 43))
 axes = axes.flatten()
@@ -455,8 +447,7 @@ for i in range(num_predictors):
     value_at_25 = round(sorted_beta_hat_i[int(np.floor(0.025 * sampling_size))], 8)
 
     beta_estimates.iloc[i, 0] = mu_post[i]
-    beta_estimates.iloc[i, 1] = lambda_post[i][i] * sigma2[i]
-    beta_estimates.iloc[i, 2] = f"[{value_at_25}, {value_at_975}]"
+    beta_estimates.iloc[i, 1] = f"[{value_at_25}, {value_at_975}]"
 
     subaxis = axes[i]
     n, bins, patches = subaxis.hist(beta_hat[:, i], bins=int(sampling_size / 1000), color=colors(i), alpha=1)
@@ -534,12 +525,11 @@ We can see that the training MSE of our Bayesian model on a training set is arou
 We will now compare the two methods based on their estimates for the $\beta$ coefficients and $\sigma^2$:
 
 ```{python, echo=FALSE}
-bayesian_beta_estimates = beta_estimates.drop("SD Estimate for Beta", axis=1)
 OLS_beta_estimates = pd.read_csv('full_model_summary.csv', index_col=0).rename(index={'(Intercept)': 'Intercept'})
 
-beta_estimates_comparison = bayesian_beta_estimates.rename(columns={'Beta Estimate': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
+beta_estimates_comparison = beta_estimates.rename(columns={'Beta Estimate': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
 
-beta_estimates_comparison['Beta Estimate Difference (OLS - Bayesian)'] = bayesian_beta_estimates['Beta Estimate'] - OLS_beta_estimates['betaEstimate']
+beta_estimates_comparison['Beta Estimate Difference (OLS - Bayesian)'] = beta_estimates['Beta Estimate'] - OLS_beta_estimates['betaEstimate']
 beta_estimates_comparison.insert(0, 'OLS Beta Estimate', OLS_beta_estimates['betaEstimate'])
 
 beta_estimates_table = tabulate(beta_estimates_comparison, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
@@ -552,35 +542,13 @@ with open('beta_estimates.tex', 'w') as f:
 ```{python, echo=FALSE}
 
 beta_extra_info = pd.DataFrame()
-beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['standardError']
-beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
 
 OLS_beta_estimates['lower95CIBound'] = OLS_beta_estimates['lower95CIBound'].round(6)
 OLS_beta_estimates['upper95CIBound'] = OLS_beta_estimates['upper95CIBound'].round(6)
 beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['lower95CIBound'].astype(str) + ', ' + OLS_beta_estimates['upper95CIBound'].astype(str) + ']'
 
 beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
-
-sd_beta_table = tabulate(beta_extra_info.iloc[:, 0:2], headers='keys', tablefmt='latex',  numalign="left", stralign="left")
-
-with open('sd_beta_table.tex', 'w') as f:
-    f.write(sd_beta_table)
-    
-```
-
-```{python, echo=FALSE}
-
-beta_extra_info = pd.DataFrame()
-beta_extra_info['OLS Beta SE Estimate'] = OLS_beta_estimates['standardError']
-beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
-
-beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
-
-OLS_beta_estimates['lower95CIBound'] = OLS_beta_estimates['lower95CIBound'].round(6)
-OLS_beta_estimates['upper95CIBound'] = OLS_beta_estimates['upper95CIBound'].round(6)
-beta_extra_info['OLS 95% Beta Confidence Interval'] = '[' + OLS_beta_estimates['lower95CIBound'].astype(str) + ', ' + OLS_beta_estimates['upper95CIBound'].astype(str) + ']'
-
-beta_95_CI_CR_table = tabulate(beta_extra_info.iloc[:, 2:], headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+beta_95_CI_CR_table = tabulate(beta_extra_info, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
 
 with open('beta_95_CI_CR_table.tex', 'w') as f:
     f.write(beta_95_CI_CR_table)
@@ -595,17 +563,10 @@ Table 2: $\beta$ Coefficient Estimates Comparison between OLS and Bayesian metho
 We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2 V)$ and $\sigma^2 \sim IG(a, b)$, where $\boldsymbol{m} = \boldsymbol{0}$, $V = 25 I$ ($I$ is the identity matrix), $a = 0.001$, and $b = 0.001$. We used this prior to simulate the posterior distribution for $\sigma^2$ and for each of the $\beta_j$ coefficients of the linear regression model. Above are the estimates and 95% credible regions of each parameter.
 
 ```{=latex}
-\input{sd_beta_table.tex}
-\\
-Table 3: $\beta$ Coefficient Standard Error/Deviation Estimates Comparison between OLS and Bayesian method
-```
-We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX).
-
-```{=latex}
 \input{beta_95_CI_CR_table.tex}
 \\
 
-Table 4: $\beta$ Coefficient Estimates 95% Confidence Intervals/Credible Region Comparison between OLS and Bayesian method
+Table 3: $\beta$ Coefficient Estimates $95\%$ Confidence Intervals/Credible Region Comparison between OLS and Bayesian method
 ```
 Table 4 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in terms of confidence intervals.
 
