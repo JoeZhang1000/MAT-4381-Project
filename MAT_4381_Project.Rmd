@@ -497,7 +497,8 @@ with open('bayesian_results.tex', 'w') as f:
 \\
 Table 1: Bayesian Posterior Beta Coefficients Estimates Summary \\
 ```
-Write here
+
+We can see that our estimated Bayesian linear regression model is $Y = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95\% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. This means that there's a 95\% probability that 0 is a value for the parameters and hence, the predictors are not statistically significant. The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model.
 
 ```{python}
 #Compute MSE
@@ -582,7 +583,7 @@ We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \si
 \\
 Table 3: $\beta$ Coefficient Standard Error/Deviation Estimates Comparison between OLS and Bayesian method
 ```
-We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX).
+We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX). 
 
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
@@ -608,6 +609,8 @@ print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {v
 ```
 
 Compare the estimates for $\sigma^2$ between OLS and Bayesian methods here.
+
+We now compare the variance of the response variable (Median House Prices) under the ordinary least squares and the Bayesian framework. Under the ordinary least squares framework, the estimate for the variance is the mean squared error, or the mean sum of squares residuals. We obtain an estimate of 21.66596 (the training MSE from OLS). Under the Bayesian framework, we get that the estimate for the variance under the squared error loss is 21.506 and the MAP estimate is 21.242. This shows that the estimate for the variance of the median house price is similar under both the ordinary least squares and the Bayesian framework.
 
 # Conclusion/Future Steps
 
