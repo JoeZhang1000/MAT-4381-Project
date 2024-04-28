@@ -251,7 +251,7 @@ boston_housing_dataset <- read.csv("Boston.csv")
 #Remove the indicator variable for river 
 boston_housing_dataset <- subset(boston_housing_dataset, select = -CHAS)
 
-train_set_indices <- createDataPartition(boston_housing_dataset$MEDV, p = 0.6, list = FALSE)
+train_set_indices <- createDataPartition(boston_housing_dataset$MEDV, p = 0.2, list = FALSE)
 
 train_set_dataset <- boston_housing_dataset[train_set_indices, ]
 
@@ -259,16 +259,24 @@ test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
 
 #For use in future Python code
 write.csv(train_set_dataset, "train_set_dataset.csv", row.names = FALSE)
+
+ggplot(boston_housing_dataset, aes(x = MEDV)) +
+  geom_histogram(bins = 60, fill = "blue", color = "black") + # Increased number of bins
+  labs(title = "Histogram of MEDV with More Bins",
+       x = "Median Value of Homes ($1000s)",
+       y = "Frequency") +
+  theme_minimal()
+
 write.csv(test_set_dataset, "test_set_dataset.csv", row.names = FALSE)
 ```
 
 ## Ordinary Least Squares Model
 
-We first fit a linear regression model under the frequentist framework. Then we make inference and evaluate the quality of the model. We consider 2 possible models: one using all predictors and one that is selected using stepwise selection.
+We first fit a linear regression model under the frequentist framework. Then we make inference and evaluate the quality of the model. We consider 2 possible models: one using all predictors and one that is selected using stepwise selection. (Note we will not talk about $R^2$ or ANOVA/F-tests between full and reduced models as these are not directly applicable to our Bayesian setting).
 
 We first fit the full model with all variables:
 
-We have that the full frequentist linear regression model fitted using the training dataset is $Y = 32.044484 - 0.121517 X_1 + 0.042545 X_2 + 0.066926 X_3 - 13.994681 X_4 + 4.021977 X_5 - 0.004531 X_6 - 1.469667 X_7 + 0.343192 X_8 - 0.014404 X_9 - 0.855679 X_{10} + 0.011628 X_{11} - 0.0629198 X_{12}$, where the variables are as described in the previous section. From looking at the summary table of the model, we see that the variables $X_3$ (INDUS) and $X_6$ (AGE) are not statistically significant under the significance level $\alpha = 0.05$ because the p-values from the t tests are greater than 0.05.
+We have that the full frequentist linear regression model fitted using the training dataset is $\hat{Y} = 32.044484 - 0.121517 X_1 + 0.042545 X_2 + 0.066926 X_3 - 13.994681 X_4 + 4.021977 X_5 - 0.004531 X_6 - 1.469667 X_7 + 0.343192 X_8 - 0.014404 X_9 - 0.855679 X_{10} + 0.011628 X_{11} - 0.0629198 X_{12}$, where the variables are as described in the previous section. From looking at the summary table of the model, we see that the variables $X_3$ (INDUS) and $X_6$ (AGE) are not statistically significant under the significance level $\alpha = 0.05$ because the p-values from the t tests are greater than 0.05.
 
 ```{r}
 
@@ -282,13 +290,16 @@ training_MSE <- mean(RSS)
 
 cat("Training MSE:", training_MSE, "\n")
 
+cat("Training MSE (adjusted for #parameters):", 
+    training_MSE*nrow(train_set_dataset)/(nrow(train_set_dataset) - length(coef(full_model))), "\n")
+
 test_MSE <- mean((test_set_dataset$MEDV - predict(full_model, newdata=test_set_dataset))^2)
 
 cat("Test MSE:", test_MSE)
 
 ```
 
-```{r, include=FALSE}
+```{r, echo=FALSE}
 full_model_summary <- summary(full_model)$coefficients
 
 write.csv(data.frame(
@@ -299,7 +310,7 @@ write.csv(data.frame(
 
 ```
 
-We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547.
+We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547. Note that the MSE used does not account for the number of parameters in the model as we wanted to be consistent between the training and test MSE computations, where in the test setting the number of parameters is not as relevant (want lowest test error). If we accounted for the number of parameters in the model, we would get a training MSE of 22.62725.
 
 Now, we build a reduced linear regression model using stepwise selection:
 
@@ -318,14 +329,19 @@ training_MSE <- mean(RSS)
 
 cat("Training MSE:", training_MSE, "\n")
 
+cat("Training MSE (adjusted for #parameters):", 
+    training_MSE*nrow(train_set_dataset)/(nrow(train_set_dataset) - length(coef(stepwise_model))), "\n")
+
 test_MSE <- mean((test_set_dataset$MEDV - predict(stepwise_model, newdata=test_set_dataset))^2)
 
 cat("Test MSE:", test_MSE)
+
+plot(full_model)
 ```
 
-We have that the reduced model selected via stepwise regression is $Y = 31.665 - 0.0.123X_1 + 0.043X_2 - 13.171578X_4 + 3.951521X_5 -1.507618X_7 + 0.325008 X_8 - 0.012985 X_9 - 0.823535 X_{10} + 0.011428 X_{11} - 0.626362X_{12}$. All predictors are statistically significant in this model based on the t tests.
+We have that the reduced model selected via stepwise regression is $\hat{Y} = 31.665 - 0.123X_1 + 0.043X_2 - 13.171578X_4 + 3.951521X_5 -1.507618X_7 + 0.325008 X_8 - 0.012985 X_9 - 0.823535 X_{10} + 0.011428 X_{11} - 0.626362X_{12}$. All predictors are statistically significant in this model based on the t-tests, indicating that we removed the non-significant predictors from the full model that were not significantly explaining the median home prices.
 
-After evaluating the model, we obtain that the training error is 21.73032 and the test error is 24.52705. This is similar to the full model, indicating that the reduced model explains as well as the full model the median value of homes in Boston. If we look at the $R^2_{adj}$ values for the reduced vs full model, we can see that the value for the full model is $0.7193$ and the value for the reduced model is $72\%$. This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly worse than the reduced model.
+After evaluating the model, we obtain that the training MSE is 21.73032 and the test MSE is 24.52705. The training MSE that accounts for the number of parameters in the model is 22.5406, which is slightly lower than the one for the full model. This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly worse than the reduced model.
 
 ## Bayesian Linear Regression Model
 
@@ -335,7 +351,7 @@ We must now choose the prior parameters for each of the prior distributions.
 
 For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
 
-For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 9$ and $b = 125$. We chose the values for $a$ and $b$ because we want the mean and mode of the distribution to closely match a value for $\sigma^2$ such that most of the data we collected for the response variable (MEDV) are within 2 standard deviations from the mean. We also made sure that this distribution does not have too low or high variability to include the possibility that the true $\sigma^2$ is way different than what we thought (we are not too confident in our prior). Now, most of the data should be within the range of $4\sigma$. The values for MEDV are between 0 and 50, so we want to have the peak of the distribution to be around 12.5. As can be seen below in the plot and statistics for this prior distribution, the variance of this distribution is around 21, the median is 12.5, and the mean is around 15.6.
+For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 9$ and $b = 125$. We chose the values for $a$ and $b$ because we want the mean and mode of the distribution to closely match a value for $\sigma^2$ such that most of the data we collected for the response variable (MEDV) are within 2 standard deviations from the mean (note that we assumed normality of the response variable). We also made sure that this distribution does not have too low or high variability to include the possibility that the true $\sigma^2$ value is way different than what we thought (we don't want to be overconfident in our prior). Now, most of the data should be within the range of $4\sigma$. The values for MEDV are between 0 and 50, so we want to have the peak of the distribution to be around 12.5. As can be seen below in the plot and statistics for this prior distribution, the variance of this distribution is around 21, the median is 12.5, and the mean is around 15.6.
 
 ```{python, echo=FALSE}
 import numpy as np
@@ -373,7 +389,7 @@ variance = (b^2)/((a-1)^2*(a-2))
 print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
 
 plt.hist(sigma2, bins=1000, alpha=1, color='green', range=(0, 40))
-plt.title('Simulated Distribution of Prior for $\\sigma^2$')
+plt.title('Histogram of Simulated Distribution of Prior for $\\sigma^2$ ($IG(9, 125)$)')
 plt.xlabel('$\\sigma^2$ values')
 plt.ylabel('Frequency')
 plt.show()
@@ -424,13 +440,6 @@ for i in range(sampling_size):
 **Plots**
 
 ```{python}
-#Plot for posterior distribution for sigma^2
-plt.hist(sigma2, bins=int(sampling_size/1000), alpha=0.5, color='orange', label='Posterior of sigma^2')
-plt.xlabel('sigma^2')
-plt.ylabel('Frequency')
-plt.title('Histogram of Simulated Posterior Distribution for Sigma^2')
-plt.legend()
-plt.show()
 
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
 
@@ -455,24 +464,32 @@ for i in range(num_predictors):
     high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
     mean_est = subaxis.axvline(x=mu_post[i], color='c', linestyle='--', linewidth=5, label = 'Posterior Beta Coefficient Estimate for Predictor')
 
-    subaxis.set_xlabel('$\\beta_{' + str(i) + '}$ Value', fontsize=25)
-    #subaxis.set_xlabel('$\\beta$' + str(i) + ' Value', fontsize=25)
-    subaxis.set_ylabel('Frequency', fontsize=25)
-    subaxis.set_title('$X_{' + str(i) + '}$ Value (' + train_set.columns[i] + ')', fontsize=3)
-    #subaxis.set_title('$X$ ' + str(i) + ' Value (' + train_set.columns[i] + ')', fontsize=3)
+    subaxis.set_xlabel('$\\beta_{' + str(i) + '}$ Value', fontsize=30)
+    subaxis.set_ylabel('Frequency', fontsize=30)
+    if (i == 0):
+      subaxis.set_title('$(' + train_set.columns[i] + ') Histogram', fontsize=30)
+    subaxis.set_title('$X_{' + str(i) + '}$ Histogram (' + train_set.columns[i] + ')', fontsize=30)
     subaxis.tick_params(axis='both', which='major', labelsize=20)
 
 lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
 lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
 fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=35, bbox_to_anchor=(0.5, 0.94))
 
-fig.suptitle('Simulated Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors', fontsize=40, y=0.98)
+fig.suptitle('Histograms of Simulated Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors', fontsize=45, y=0.98)
 
 plt.tight_layout(rect=[0, 0, 1, 0.92])
 
 for i in range(num_predictors, 15):
     axes[i].axis('off')
 
+plt.show()
+
+#Plot for posterior distribution for sigma^2
+plt.hist(sigma2, bins=int(sampling_size/1000), alpha=1, color='orange')
+plt.xlabel('$\\sigma^2$ values')
+plt.ylabel('Frequency')
+plt.title('Histogram of Simulated Posterior Distribution for $\\sigma^2$')
+plt.legend()
 plt.show()
 
 ```
@@ -497,8 +514,7 @@ with open('bayesian_results.tex', 'w') as f:
 \\
 Table 1: Bayesian Posterior Beta Coefficients Estimates Summary \\
 ```
-
-We can see that our estimated Bayesian linear regression model is $Y = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95\% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. This means that there's a 95\% probability that 0 is a value for the parameters and hence, the predictors are not statistically significant. The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model.
+We can see that our estimated Bayesian linear regression model is $Y = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. This means that there's a 95% probability that 0 is a value for the parameters and hence, the predictors are not statistically significant. The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model.
 
 ```{python}
 #Compute MSE
@@ -583,7 +599,7 @@ We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \si
 \\
 Table 3: $\beta$ Coefficient Standard Error/Deviation Estimates Comparison between OLS and Bayesian method
 ```
-We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX). 
+We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX).
 
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
