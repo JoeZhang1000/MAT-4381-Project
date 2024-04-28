@@ -223,7 +223,7 @@ The variables of the data are as follows:
   \item MEDV: Median value of owner-occupied homes in \$1000s (target variable)
 \end{itemize}
 ```
-Our goal is to construct a linear regression model that describes the relationship between the median value of owner-occupied homes and the factors that affect housing prices in the Boston area. We build a model using both the frequentist and the Bayesian framework. We are removing the variable CHAS because it is an indicator variable.
+Our goal is to construct a linear regression model that describes the relationship between the median value of owner-occupied homes and the factors that affect housing prices in the Boston area. We build a model using both the frequentist and the Bayesian framework. We are removing the variable CHAS because it is an indicator variable. We construct the models and then we compare them.
 
 To make things easier to read, we will be using the following notations for variables:
 
@@ -599,13 +599,15 @@ with open('beta_95_CI_CR_table.tex', 'w') as f:
 Table 2: $\beta$ Coefficient Estimates Comparison between OLS and Bayesian method
 ```
 
+We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2 V)$ and $\sigma^2 \sim IG(a, b)$, where $\boldsymbol{m} = \boldsymbol{0}$, $V = 25 I$ ($I$ is the identity matrix), $a = 0.001$, and $b = 0.001$. We used this prior to simulate the posterior distribution for $\sigma^2$ and for each of the $\beta_j$ coefficients of the linear regression model. Above are the estimates and 95\% credible regions of each parameter.
+
 ```{=latex}
 \input{sd_beta_table.tex}
 \\
 Table 3: $\beta$ Coefficient Standard Deviation Estimates Comparison between OLS and Bayesian method
 ```
 
-Write here 
+We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX).
 
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
@@ -614,13 +616,13 @@ Write here
 Table 4: $\beta$ Coefficient Estimates 95% Confidence Intervals/Credible Region Comparison between OLS and Bayesian method
 ```
 
-Write here
+Table 4 above compares the 95\% confidence intervals of the parameters under the ordinary least squares framework and the 95\% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95\% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model.
 
 Compare the estimates for $\sigma^2$ between OLS and Bayesian methods here.
 
 # Conclusion/Future Steps
 
-All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. With the Bayesian model, we could further explore ....
+All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. We see that using the prior we picked for the Bayesian model, the estimates for the parameters are similar for both the ordinary least squares model and the Bayesian linear regression model. With the Bayesian model, we could further explore prediction of new observations, hypothesis testing of multiple parameters, and transformations.
 
 # References
 
