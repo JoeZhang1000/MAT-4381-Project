@@ -251,7 +251,7 @@ boston_housing_dataset <- read.csv("Boston.csv")
 #Remove the indicator variable for river 
 boston_housing_dataset <- subset(boston_housing_dataset, select = -CHAS)
 
-train_set_indices <- createDataPartition(boston_housing_dataset$MEDV, p = 0.2, list = FALSE)
+train_set_indices <- createDataPartition(boston_housing_dataset$MEDV, p = 0.6, list = FALSE)
 
 train_set_dataset <- boston_housing_dataset[train_set_indices, ]
 
@@ -261,7 +261,7 @@ test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
 write.csv(train_set_dataset, "train_set_dataset.csv", row.names = FALSE)
 
 ggplot(boston_housing_dataset, aes(x = MEDV)) +
-  geom_histogram(bins = 60, fill = "blue", color = "black") + # Increased number of bins
+  geom_histogram(bins = 30, fill = "blue", color = "black") + # Increased number of bins
   labs(title = "Histogram of MEDV with More Bins",
        x = "Median Value of Homes ($1000s)",
        y = "Frequency") +
@@ -351,7 +351,7 @@ We must now choose the prior parameters for each of the prior distributions.
 
 For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
 
-For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 9$ and $b = 125$. We chose the values for $a$ and $b$ because we want the mean and mode of the distribution to closely match a value for $\sigma^2$ such that most of the data we collected for the response variable (MEDV) are within 2 standard deviations from the mean (note that we assumed normality of the response variable). We also made sure that this distribution does not have too low or high variability to include the possibility that the true $\sigma^2$ value is way different than what we thought (we don't want to be overconfident in our prior). Now, most of the data should be within the range of $4\sigma$. The values for MEDV are between 0 and 50, so we want to have the peak of the distribution to be around 12.5. As can be seen below in the plot and statistics for this prior distribution, the variance of this distribution is around 21, the median is 12.5, and the mean is around 15.6.
+For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. 
 
 ```{python, echo=FALSE}
 import numpy as np
@@ -374,8 +374,8 @@ test_set = pd.read_csv('test_set_dataset.csv', header=0, sep=',')
 num_predictors = len(train_set.columns)
 
 #Set the parameters for the prior distribution for sigma2 (inverse gamma) (non-informative)
-a = 9
-b = 125
+a = 5
+b = 75
 
 #Set the parameters for the prior distribution for mu (normal) (non-informative)
 V = np.diag([25] * num_predictors)
@@ -385,10 +385,10 @@ m = np.zeros(num_predictors)
 sigma2 = 1 / np.random.gamma(shape=a, scale=1/b, size=1000000)
 mode = b/(a+1)
 mean = b/(a-1)
-variance = (b^2)/((a-1)^2*(a-2))
+variance = (b^2)/((a-1)^2 *(a-2))
 print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
 
-plt.hist(sigma2, bins=1000, alpha=1, color='green', range=(0, 40))
+plt.hist(sigma2, bins=1000, alpha=1, color='green', range=(0, 100))
 plt.title('Histogram of Simulated Distribution of Prior for $\\sigma^2$ ($IG(9, 125)$)')
 plt.xlabel('$\\sigma^2$ values')
 plt.ylabel('Frequency')
