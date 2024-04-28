@@ -307,8 +307,6 @@ Now, we build a reduced linear regression model using stepwise selection:
 
 stepwise_model_results <- ols_step_both_p(full_model, details = FALSE, p_enter = 0.10, p_remove = 0.15)
 
-print(stepwise_model_results)
-
 stepwise_model <- lm(MEDV ~ CRIM + ZN + NX + RM + DIS + RAD + TAX + PTRATIO + B + LSTAT, 
                      data = train_set_dataset)
 
@@ -374,8 +372,8 @@ mean = b/(a-1)
 variance = (b^2)/((a-1)^2*(a-2))
 print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
 
-plt.hist(sigma2, bins=1000, alpha=1, color='red', range=(0, 40))
-plt.title('Simulated Distribution of $\\sigma^2$')
+plt.hist(sigma2, bins=1000, alpha=1, color='green', range=(0, 40))
+plt.title('Simulated Distribution of Prior for $\\sigma^2$')
 plt.xlabel('$\\sigma^2$ values')
 plt.ylabel('Frequency')
 plt.show()
@@ -455,18 +453,20 @@ for i in range(num_predictors):
     n, bins, patches = subaxis.hist(beta_hat[:, i], bins=int(sampling_size / 1000), color=colors(i), alpha=1)
     low_cr = subaxis.axvline(x=value_at_25, color='r', linestyle='--', linewidth=5, label = 'Lower 95% CR Bound for Estimate')
     high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
-    mean_est = subaxis.axvline(x=mu_post[i], color='b', linestyle='--', linewidth=5, label = 'Posterior Beta Coefficient Estimate for Predictor')
+    mean_est = subaxis.axvline(x=mu_post[i], color='c', linestyle='--', linewidth=5, label = 'Posterior Beta Coefficient Estimate for Predictor')
 
-    subaxis.set_xlabel(f'Beta {i} Value', fontsize = 25)
+    subaxis.set_xlabel('$\\beta_{' + str(i) + '}$ Value', fontsize=25)
+    #subaxis.set_xlabel('$\\beta$' + str(i) + ' Value', fontsize=25)
     subaxis.set_ylabel('Frequency', fontsize=25)
-    subaxis.set_title(f'X_{i} ({train_set.columns[i]})', fontsize=35)
+    subaxis.set_title('$X_{' + str(i) + '}$ Value (' + train_set.columns[i] + ')', fontsize=3)
+    #subaxis.set_title('$X$ ' + str(i) + ' Value (' + train_set.columns[i] + ')', fontsize=3)
     subaxis.tick_params(axis='both', which='major', labelsize=20)
 
 lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
 lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
 fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=35, bbox_to_anchor=(0.5, 0.94))
 
-fig.suptitle('Simulated Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors', fontsize=60, y=0.98)
+fig.suptitle('Simulated Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors', fontsize=40, y=0.98)
 
 plt.tight_layout(rect=[0, 0, 1, 0.92])
 
@@ -554,7 +554,7 @@ with open('sd_beta_table.tex', 'w') as f:
 ```{python, echo=FALSE}
 
 beta_extra_info = pd.DataFrame()
-beta_extra_info['OLS Beta SD Estimate'] = OLS_beta_estimates['standardError']
+beta_extra_info['OLS Beta SE Estimate'] = OLS_beta_estimates['standardError']
 beta_extra_info['Bayesian Beta SD Estimate'] = beta_estimates['SD Estimate for Beta']
 
 beta_extra_info['Bayesian 95% Beta Credible Region'] = beta_estimates['95% Credible Region']
@@ -580,7 +580,7 @@ We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \si
 ```{=latex}
 \input{sd_beta_table.tex}
 \\
-Table 3: $\beta$ Coefficient Standard Deviation Estimates Comparison between OLS and Bayesian method
+Table 3: $\beta$ Coefficient Standard Error/Deviation Estimates Comparison between OLS and Bayesian method
 ```
 We can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. From looking at table 2, the last column shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. However, if we look at the estimates of the standard deviation of the parameters, some of them are very similar under both the ordinary least squares and Bayesian framework, and some are quite different (notably for the intercept and for the predictor NX).
 
@@ -600,11 +600,11 @@ cat("OLS sigma^2 best estimate:", training_MSE_adj)
 
 ```{python}
 #Plot of prior for sigma^2
-#sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_size)
-#mode = r_post/(alpha_post+1)
-#mean = r_post/(alpha_post-1)
-#variance = (r_post^2)/((alpha_post-1)^2*(alpha_post-2))
-#print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
+sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_size)
+mode = r_post/(alpha_post+1)
+mean = r_post/(alpha_post-1)
+variance = (r_post**2)/((alpha_post-1)**2 *(alpha_post-2))
+print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
 ```
 
 Compare the estimates for $\sigma^2$ between OLS and Bayesian methods here.
