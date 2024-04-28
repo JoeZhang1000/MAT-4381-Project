@@ -79,7 +79,7 @@ From the confidence interval, we can reject $H_0$ if $\beta_{j_0}$ is contained 
 
 ### ANOVA tests
 
-There's another way to test whether predictors are significant to the model, but instead of testing individual parameters only, we can test a subset of all parameters. This is known as the ANOVA test. We won't explore this in detail as this is not the primary topic of this paper.
+There's another way to test whether predictors are significant to the model, but instead of testing individual parameters only, we can test a subset of all parameters. This is known as the ANOVA test (we will look at one F-test). We won't explore this in too much detail as this is not the primary topic of this paper.
 
 ## Prediction
 
@@ -348,7 +348,7 @@ print(anova_comparison)
 #anova(stepwise_model, full_model)
 ```
 
-(overall we can see that the full model with the F test (explain further) shows that the full model with all of the predictors versus the reduced model with AGE (proportion of owner-occupied units built prior to 1940) and INDUS (proportion of non-retail business acres per town))
+Lastly, we can test the null hypothesis that the extra parameters in the full model are not significant versus the alternative that they are significant using the F-test. As seen in the table, we can see that the p-value for the test is around 65%, which is very high, indicating that we do not reject the null hypothesis. This leads to way to us choosing the reduced model as a better choice due to it removing non-significant predictors.
 
 ## Bayesian Linear Regression Model
 
@@ -356,7 +356,7 @@ print(anova_comparison)
 
 We must now choose the prior parameters for each of the prior distributions. 
 
-For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $10I$. Now, when we set the means to 0 and $V$ to $\lambda I$, where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the estimates for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occur towards 0. The purpose of this is to attempt to not overfit the training data and be able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=2$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
+For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $10I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the estimates for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occur towards 0. The purpose of this is to attempt to not overfit the training data and be able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=2$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
 
 We start with setting the parameters for \$\\sigma^2 \\sim IG(a,b)\$. As we are not experts in the field of predicting home prices, we do not know the specifics of the variability of home prices in Boston. Therefore, we chose to set the prior for^ $\sigma^2$ to a non-informative prior. We decided to choose the $IG(1,1)$ prior for $\sigma^2$ as we believe that $\sigma^2$ is mostly likely small due to the high quality source of the data, but there might be ....
 
@@ -378,15 +378,28 @@ test_set = pd.read_csv('test_set_dataset.csv', header=0, sep=',')
 num_predictors = len(train_set.columns)
 
 #Set the parameters for the prior distribution for sigma2 (inverse gamma) (non-informative)
-a = 0.001
-b = 0.001
+a = 10
+b = 125
 
 #Set the parameters for the prior distribution for mu (normal) (non-informative)
 
-V = np.diag([20] * num_predictors)
+V = np.diag([25] * num_predictors)
 m = np.zeros(num_predictors)
 
 # m = np.array([100 for i in range(num_predictors)])
+
+#Plot of prior for sigma^2
+sigma2 = 1 / np.random.gamma(shape=a, scale=1/b, size=1000000)
+mode = b/(a+1)
+mean = b/(a-1)
+print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}")
+
+plt.hist(sigma2, bins=1000, alpha=1, color='red', range=(0, 40))
+plt.title('Simulated Distribution of $\\sigma^2$')
+plt.xlabel('$\\sigma^2$ values')
+plt.ylabel('Frequency')
+plt.show()
+
 ```
 
 **Algorithm**
