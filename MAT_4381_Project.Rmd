@@ -23,7 +23,7 @@ $$\boldsymbol{y} = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix} \te
 
 The most well-known way is to use the ordinary least squares method to estimate the parameters. The goal of this paper is to compare the ordinary least squares method with the Bayesian method of estimating parameters.
 
-# Ordinary Least Squares Regression Revisited
+#Ordinary Least Squares Regression Revisited (based on Montgomery, Peck, & Vining, 2021, pp. 12-91)
 
 ## Estimation of Model Parameters
 
@@ -35,7 +35,11 @@ We need to take derivatives of $S(\boldsymbol{\beta})$ with respect to $\boldsym
 
 If we set this equation to 0 and we solve for $\boldsymbol{\beta}$, we get $$X^TX\boldsymbol{\beta} = X^T\boldsymbol{y}$$
 
-If we multiply both sides by the inverse of $X^TX$, assuming that it is invertible, then the least squares estimator of $\boldsymbol{\beta}$ is $$\hat{\boldsymbol{\beta}} = (X^TX)^{-1}X^T\boldsymbol{y}$$
+If we multiply both sides by the inverse of $X^TX$, assuming that it is invertible, then the least squares estimator of $\boldsymbol{\beta}$ is $$\hat{\boldsymbol{\beta}} = (X^TX)^{-1}X^T\boldsymbol{y}$$. 
+
+The fitted model is as follows: 
+
+$$\hat{\boldsymbol{y}} = X\hat{\boldsymbol{\beta}}$$
 
 The least squares estimator of $\boldsymbol{\beta}$ has the following properties:
 
@@ -99,7 +103,7 @@ Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsym
 
 ### Computation of posterior distribution
 
-Now that we have the likelihood function and the prior probability distribution of the parameters, we can now compute the posterior distribution of the parameters. We will follow a similar procedure to [3]. We let $h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)$ represent the posterior distribution function:
+Now that we have the likelihood function and the prior probability distribution of the parameters, we can now compute the posterior distribution of the parameters. We will follow a similar procedure to Wundervald (2019). We let $h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)$ represent the posterior distribution function:
 
 ```{=tex}
 \begin{equation*}
@@ -187,7 +191,7 @@ To simulate the marginal distribution for a parameter $\beta_j$, we can use the 
 
 # Application
 
-Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset [citation].
+Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset (Harrison & Rubinfeld, 1978).
 
 ## Data Description and Preprocessing
 
@@ -234,16 +238,17 @@ To make things easier to read, we will be using the following notations for vari
   \item $Y: MEDV$
 \end{itemize}
 ```
-Dataset Source: The data were derived from information collected by the U.S. Census Service concerning housing in the area of Boston, Massachusetts.
+Dataset Source: The data were derived from information collected by the U.S. Census Service concerning housing in the area of Boston, Massachusetts. Note that it is believed that the median house prices were censored past 50 ($50,000).
 
 We first divide the data into training and test sets randomly:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 library(caret)
 library(olsrr)
 ```
 
 ```{r}
+#Set seed for reproducibility
 set.seed(1)
 
 boston_housing_dataset <- read.csv("Boston.csv")
@@ -251,6 +256,7 @@ boston_housing_dataset <- read.csv("Boston.csv")
 #Remove the indicator variable for river 
 boston_housing_dataset <- subset(boston_housing_dataset, select = -CHAS)
 
+#Create train and test sets
 train_set_indices <- createDataPartition(boston_housing_dataset$MEDV, p = 0.6, list = FALSE)
 
 train_set_dataset <- boston_housing_dataset[train_set_indices, ]
@@ -261,6 +267,26 @@ test_set_dataset <- boston_housing_dataset[-train_set_indices, ]
 write.csv(train_set_dataset, "train_set_dataset.csv", row.names = FALSE)
 write.csv(test_set_dataset, "test_set_dataset.csv", row.names = FALSE)
 ```
+
+```{r}
+
+#Draw plot of MEDV
+ggplot(train_set_dataset, aes(x = MEDV)) +
+  geom_histogram(bins = 20, fill = "#7b79d4", color = "#0e0d42") +
+  labs(title = "Histogram of Median value of owner-occupied homes in $1000s (MEDV)", 
+       x = "Median Value of Owner-Occupied Homes ($1000s)", y = "Frequency") + 
+  theme_minimal() 
+
+```
+
+```{=latex}
+
+Figure 1: Histogram of median value of owner-occupied homes in \$1000s (response/target variable of regression)
+
+```
+
+As seen in Figure 1, the response variable MEDV is somewhat normally distributed, with some outliers around 50. This is a result of the median house prices being censored past $50,000 in the dataset. 
+
 
 ## Ordinary Least Squares Model
 
@@ -302,16 +328,9 @@ write.csv(data.frame(
 
 ```
 
-We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547. Note that the MSE used does not account for the number of parameters in the model as we wanted to be consistent between the training and test MSE computations, where in the test setting the number of parameters is not as relevant (want lowest test error). If we accounted for the number of parameters in the model, we would get a training MSE of 22.62725.
+We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547. Note that the MSE used does not account for the number of parameters in the model as we wanted to be consistent between the training and test MSE computations, where in the test setting the number of parameters is not as relevant (want lowest test error independent of #parameters). If we accounted for the number of parameters in the model, we would get a training MSE of 22.62725.
 
-```{r}
- par(mfrow = c(2, 2))
- plot(full_model)
-```
-
-We now looked at model diagnostics. We find that we can assume that the variance of the error terms are constant and we can also assume that the relationship is linear from looking at the residual vs. fitted plot. This is because the points don't follow a noticeable pattern. However, from looking at the qq-plot, the assumption that the random errors are normally distributed may not be reasonable for this specific dataset.
-
-Now, we build a reduced linear regression model using stepwise selection:
+Now, we build a reduced linear regression model using stepwise selection (allow predictors to enter the model with p-value of t-test less than 10% and be removed with p-value of t-test greater than 15% (p-value/t-test is computed based on the model at that current step of the stepwise process)):
 
 ```{r}
 
@@ -335,13 +354,21 @@ cat("Training MSE (adjusted for #parameters):",
 test_MSE <- mean((test_set_dataset$MEDV - predict(stepwise_model, newdata=test_set_dataset))^2)
 
 cat("Test MSE:", test_MSE)
-
-plot(full_model)
 ```
 
-We have that the reduced model selected via stepwise regression is $\hat{Y} = 31.665 - 0.123X_1 + 0.043X_2 - 13.171578X_4 + 3.951521X_5 -1.507618X_7 + 0.325008 X_8 - 0.012985 X_9 - 0.823535 X_{10} + 0.011428 X_{11} - 0.626362X_{12}$. All predictors are statistically significant in this model based on the t-tests, indicating that we removed the non-significant predictors from the full model that were not significantly explaining the median home prices.
+```{r, echo=FALSE}
+reduced_model_summary <- summary(stepwise_model)$coefficients
 
-After evaluating the model, we obtain that the training MSE is 21.73032 and the test MSE is 24.52705. The training MSE that accounts for the number of parameters in the model is 22.5406, which is slightly lower than the one for the full model. This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly worse than the reduced model.
+write.csv(data.frame(
+  betaEstimate = reduced_model_summary[, "Estimate"],
+  standardError = reduced_model_summary[, "Std. Error"],
+  lower95CIBound = confint(stepwise_model, level = 0.95)[, "2.5 %"],
+  upper95CIBound = confint(stepwise_model, level = 0.95)[, "97.5 %"]), "stepwise_model_summary.csv", row.names = TRUE)
+```
+
+We have that the reduced model selected via stepwise regression is $\hat{Y} = 31.664864 - 0.123388X_1 + 0.042781X_2 - 13.171578X_4 + 3.951521X_5 -1.507618X_7 + 0.325008 X_8 - 0.012985 X_9 - 0.823535 X_{10} + 0.011428 X_{11} - 0.626362X_{12}$. All predictors are statistically significant in this model based on the t-tests, indicating that we removed the non-significant predictors from the full model that were not significantly explaining the median home prices. 
+
+After evaluating the model, we obtain that the training MSE is 21.73032 and the test MSE is 24.52705. The training MSE that accounts for the number of parameters in the model is 22.5406, which is slightly lower than the one for the full model. This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly worse than the reduced model. Note that the test MSE is also slightly lower with this model. 
 
 ## Bayesian Linear Regression Model
 
@@ -349,9 +376,9 @@ After evaluating the model, we obtain that the training MSE is 21.73032 and the 
 
 We must now choose the prior parameters for each of the prior distributions.
 
-For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting) [4].
+For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression (Montgomery, Peck, & Vining, 2021, pp. 312-315). The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
 
-For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable. We picked a prior that tries to minimize the variance of the random error because we believe that our data source is high quality and we believe that our model is a good fit with minimal error. As seen below, the distribution has a mode of 12.5, mean of 18.75 (both relatively low), and variance of 36.5 indicating that we are not overconfident in our prior. We ensured that the distribution tails off quickly past around 50, which is the set bound on the response variable MEDV.
+For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable (James, Witten, Hastie, & Tibshirani, 2013, p. 63). We picked a prior that tries to minimize the variance of the random error because we believe that our data source is high quality and we believe that our model is a good fit with minimal error. As seen below, the distribution has a mode of 12.5, mean of 18.75 (both relatively low), and variance of 36.5 indicating that we are not overconfident in our prior. We ensured that the distribution tails off quickly past around 50, which is the set bound on the response variable MEDV.
 
 ```{python, echo=FALSE}
 import numpy as np
@@ -396,7 +423,7 @@ plt.show()
 ```
 
 ```{=latex}
-Figure 1: Histogram of Simulated Distribution of Prior for $\sigma^2$ ($IG(5, 75)$)
+Figure 2: Histogram of Simulated Distribution of Prior for $\sigma^2$ ($IG(5, 75)$)
 \newpage
 ```
 
@@ -503,7 +530,7 @@ plt.show()
 ```
 
 ```{=latex}
-Figure 2: Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors (with labels for 95\% credible regions and mean of posterior distributions)
+Figure 3: Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors (with labels for 95\% credible regions and mean of posterior distributions)
 ```
 
 ```{python}
@@ -518,13 +545,13 @@ plt.show()
 ```
 
 ```{=latex}
-Figure 3: Histogram of Simulated Posterior Distribution for $\sigma^2$
+Figure 4: Histogram of Simulated Posterior Distribution for $\sigma^2$
 \newpage
 ```
 
 **Results**
 
-```{python, echo=FALSE}
+```{python, echo=FALSE, warning=FALSE, message=FALSE}
 bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',  
                             numalign="left", stralign="left")
 
@@ -559,13 +586,13 @@ We can see that the training MSE of our Bayesian model on a training set is arou
 
 We will now compare the two methods based on their estimates for the $\beta$ coefficients and $\sigma^2$:
 
-```{python, echo=FALSE}
+```{python, echo=FALSE, warning=FALSE, message=FALSE}
 OLS_beta_estimates = pd.read_csv('full_model_summary.csv', index_col=0).rename(index={'(Intercept)': 'Intercept'})
 
 beta_estimates_comparison = beta_estimates.rename(columns={'Best Posterior Beta Estimate (under Squared Error Loss)': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
 
-beta_estimates_comparison['Beta Estimate Magnitude Difference (|OLS| - |Bayesian|)'] = abs(beta_estimates['Best Posterior Beta Estimate (under Squared Error Loss)']) - abs(OLS_beta_estimates['betaEstimate'])
-beta_estimates_comparison.insert(0, 'OLS Beta Estimate', OLS_beta_estimates['betaEstimate'])
+beta_estimates_comparison['Beta Estimate Difference (|OLS| - |Bayesian|)'] = abs(beta_estimates['Best Posterior Beta Estimate (under Squared Error Loss)']) - abs(OLS_beta_estimates['betaEstimate'])
+beta_estimates_comparison.insert(0, 'Full OLS Beta Estimate', OLS_beta_estimates['betaEstimate'])
 
 beta_estimates_table = tabulate(beta_estimates_comparison, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
 
@@ -575,7 +602,24 @@ with open('beta_estimates.tex', 'w') as f:
 f.close()
 ```
 
-```{python, echo=FALSE}
+
+```{python, echo=FALSE, warning=FALSE, message=FALSE}
+OLS_beta_estimates = pd.read_csv('stepwise_model_summary.csv', index_col=0).rename(index={'(Intercept)': 'Intercept'})
+
+beta_estimates_comparison = beta_estimates.rename(columns={'Best Posterior Beta Estimate (under Squared Error Loss)': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1).drop(["AGE", "INDUS"], axis=0)
+
+beta_estimates_comparison['Beta Estimate Difference (|OLS| - |Bayesian|)'] = abs(beta_estimates['Best Posterior Beta Estimate (under Squared Error Loss)'].drop(["AGE", "INDUS"], axis=0)) - abs(OLS_beta_estimates['betaEstimate'])
+beta_estimates_comparison.insert(0, 'Stepwise OLS Beta Estimate', OLS_beta_estimates['betaEstimate'])
+
+beta_estimates_table = tabulate(beta_estimates_comparison, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
+
+with open('reduced_beta_estimates.tex', 'w') as f:
+    f.write(beta_estimates_table)
+
+f.close()
+```
+
+```{python, echo=FALSE, warning=FALSE, message=FALSE}
 
 beta_extra_info = pd.DataFrame()
 
@@ -595,17 +639,27 @@ f.close()
 ```{=latex}
 \input{beta_estimates.tex}
 \\
-Table 2: Comparison of the ordinary least squares estimates and the Bayes estimates of the parameters under the squared error loss of the model parameters.
+Table 2: Comparison of the ordinary least squares estimates (full model) and the Bayes estimates of the parameters under the squared error loss of the model parameters.
 ```
 As seen in Table 2, we can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. The last column of Table 2 shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. This is due to choosing a small $\lambda$ value in the Bayesian framework (the smaller $\lambda$ is chosen the less penalty is applied to large beta coefficients), resulting in a minor shrinkage in the beta coefficient estimates in the Bayesian setting. This small shrinkage in the Bayesian Beta coefficients estimates can be seen in the last column of the table. Negative values indicate that the Bayesian best estimates shrunk towards 0 compared to the ordinary least squares estimates, while positive values indicates they grew away from 0. It is evident that for the majority of Beta coefficients, our best estimates under the Bayesian setting became smaller than the ordinarly least squares best estimates.
+
+```{=latex}
+\input{reduced_beta_estimates.tex}
+\\
+Table 3: Comparison of the ordinary least squares estimates (reduced/stepwise model) and the Bayes estimates of the parameters under the squared error loss of the model parameters.
+```
+
+Similarly to the full model, the reduced/stepwise model produces similar results to the Bayesian model for the Beta coefficient estimates as seen in Table 3. Among most coefficient estimates, the differences are slightly smaller than with the full model. We also have more beta coefficients in the Bayesian model that are slightly greater than the reduced model estimates than with the full model.
+
+If we look at the training and test MSE from all three models, they are all extremely similar, indicating that they all fit the model relatively the same. 
 
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
 \\
 
-Table 3: Comparison of the 95\% confidence intervals and the 95\% credible regions of the $\beta$ parameters.
+Table 4: Comparison of the 95\% confidence intervals (from full OLS model) and the 95\% credible regions of the $\beta$ parameters.
 ```
-Table 3 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in this regard. 
+Table 4 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in this regard. 
 
 ```{r}
 #Get the MSE version that adjusts for the number of parameters in the model to estimate sigma^2
@@ -631,8 +685,10 @@ All in all, we explored the differences between Ordinary Least Squares Regressio
 
 # References
 
-5.1 - Ridge Regression. PennState. (2018). https://online.stat.psu.edu/stat857/node/155/ 
+Harrison, D., & Rubinfeld, D. L. (1978). Hedonic prices and the demand for clean air. *Journal of Environmental Economics and Management*, 5, 81-102.
 
-Montgomery, D. C., Peck, E. A., & Vining, G. G. (2021). Introduction to linear regression analysis (6th ed.).
+James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). *An introduction to statistical learning: With applications in R*. Springer.
+
+Montgomery, D. C., Peck, E. A., & Vining, G. G. (2021). *Introduction to linear regression analysis* (6th ed.).
 
 Wundervald, B. (2019, June). Bayesian linear regression. https://doi.org/10.13140/RG.2.2.28385.97121
