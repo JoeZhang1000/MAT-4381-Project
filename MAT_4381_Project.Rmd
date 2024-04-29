@@ -201,7 +201,7 @@ The variables of the data are as follows:
   \item ZN: proportion of residential land zoned for lots over 25,000 sq.ft.
   \item INDUS: proportion of non-retail business acres per town
   \item CHAS: Charles River dummy variable (1 if tract bounds river; 0 otherwise)   
-  \item NOX: nitric oxides concentration (parts per 10 million)
+  \item NOX/NX: nitric oxides concentration (parts per 10 million)
   \item RM: average number of rooms per dwelling
   \item AGE: proportion of owner-occupied units built prior to 1940
   \item DIS: weighted distances to five Boston employment centres
@@ -222,7 +222,7 @@ To make things easier to read, we will be using the following notations for vari
   \item $X_1: CRIM$
   \item $X_2: ZN$
   \item $X_3: INDUS$
-  \item $X_4: NOX$
+  \item $X_4: NOX/NX$
   \item $X_5: RM$
   \item $X_6: AGE$
   \item $X_7: DIS$
@@ -329,7 +329,8 @@ training_MSE <- mean(RSS)
 cat("Training MSE:", training_MSE, "\n")
 
 cat("Training MSE (adjusted for #parameters):", 
-    training_MSE*nrow(train_set_dataset)/(nrow(train_set_dataset) - length(coef(stepwise_model))), "\n")
+    training_MSE*nrow(train_set_dataset)/
+    (nrow(train_set_dataset) - length(coef(stepwise_model))), "\n")
 
 test_MSE <- mean((test_set_dataset$MEDV - predict(stepwise_model, newdata=test_set_dataset))^2)
 
@@ -350,7 +351,7 @@ We must now choose the prior parameters for each of the prior distributions.
 
 For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting) [4].
 
-For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable. We picked a prior that tries to minimize the variance of the random error because we assume that our data is high quality and we assume that our model is a good fit with minimal error.
+For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable. We picked a prior that tries to minimize the variance of the random error because we believe that our data source is high quality and we believe that our model is a good fit with minimal error. As seen below, the distribution has a mode of 12.5, mean of 18.75 (both relatively low), and variance of 36.5 indicating that we are not overconfident in our prior. We ensured that the distribution tails off quickly past around 50, which is the set bound on the response variable MEDV.
 
 ```{python, echo=FALSE}
 import numpy as np
@@ -388,18 +389,24 @@ variance = (b^2)/((a-1)^2 *(a-2))
 print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
 
 plt.hist(sigma2, bins=1000, alpha=1, color='green', range=(0, 100))
-plt.title('Histogram of Simulated Distribution of Prior for $\\sigma^2$ ($IG(9, 125)$)')
+plt.title('Histogram of Simulated Distribution of Prior for $\\sigma^2$ ($IG(5, 75)$)')
 plt.xlabel('$\\sigma^2$ values')
 plt.ylabel('Frequency')
 plt.show()
 ```
 
+```{=latex}
+Figure 1: Histogram of Simulated Distribution of Prior for $\sigma^2$ ($IG(5, 75)$)
+\newpage
+```
+
 **Algorithm**
 
-We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{1, \dots, 12\}$, with the $i^{th}$ $\beta$ corresponding to the $i^{th}$ predictor ($X_i$) ($\beta_0$/$X_0$ is intercept term).
+We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{1, \dots, 12\}$, with the $i^{th}$ $\beta$ corresponding to the $i^{th}$ predictor ($X_i$) ($\beta_0$ is intercept term).
 
 ```{python}
 
+#Some Preprocessing
 train_set.insert(0, 'Intercept', 1)
 test_set.insert(0, 'Intercept', 1)
 
@@ -416,16 +423,18 @@ sampling_size = 30000
 V_inv = np.linalg.inv(V)
 
 #Compute the mean of the posterior distribution of beta given sigma2 (normal)
-mu_post = np.linalg.inv(X_training_set.T @ X_training_set + V_inv) @ (X_training_set.T @ y_training_set + V_inv @ m)
+mu_post = (np.linalg.inv(X_training_set.T @ X_training_set + V_inv) 
+           @ (X_training_set.T @ y_training_set + V_inv @ m))
 
 #Compute the lambda matrix of the posterior distribution of beta given sigma2 (normal)
 lambda_post = np.linalg.inv(X_training_set.T @ X_training_set + V_inv)
 
-#Compute alpha paramater of sigma2 posterior distribution (inverse gamma)
+#Compute alpha and r paramater of sigma2 posterior distribution (inverse gamma)
 alpha_post = a + len(y_training_set) / 2
-r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) @ mu_post + 2*b + y_training_set.T @ y_training_set) / 2
+r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) 
+          @ mu_post + 2*b + y_training_set.T @ y_training_set) / 2
 
-# Draw sigma2 from the inverse gamma distribution
+# Draw sigma2 from its posterior inverse gamma distribution
 sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_size)
 
 beta_hat = np.zeros((sampling_size, num_predictors))
@@ -442,9 +451,10 @@ for i in range(sampling_size):
 
 colors = LinearSegmentedColormap.from_list("gradient", ["red", "purple", "blue"], N=num_predictors)
 
-beta_estimates = pd.DataFrame(index=train_set.columns[0:num_predictors], columns=["Beta Estimate", "95% Credible Region"])
+beta_estimates = pd.DataFrame(index=train_set.columns[0:num_predictors], 
+                              columns=["Best Posterior Beta Estimate (under Squared Error Loss)", "95% Credible Region"])
 
-fig, axes = plt.subplots(5, 3, figsize=(35, 43))
+fig, axes = plt.subplots(5, 3, figsize=(35, 46))
 axes = axes.flatten()
 
 #Create the graphs
@@ -457,23 +467,31 @@ for i in range(num_predictors):
     beta_estimates.iloc[i, 1] = f"[{value_at_25}, {value_at_975}]"
 
     subaxis = axes[i]
-    n, bins, patches = subaxis.hist(beta_hat[:, i], bins=int(sampling_size / 1000), color=colors(i), alpha=1)
-    low_cr = subaxis.axvline(x=value_at_25, color='r', linestyle='--', linewidth=5, label = 'Lower 95% CR Bound for Estimate')
-    high_cr = subaxis.axvline(x=value_at_975, color='darkred', linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
-    mean_est = subaxis.axvline(x=mu_post[i], color='c', linestyle='--', linewidth=5, label = 'Posterior Beta Coefficient Estimate for Predictor')
+    n, bins, patches = subaxis.hist(beta_hat[:, i], 
+                                    bins=int(sampling_size / 1000), color=colors(i), alpha=1)
+    low_cr = subaxis.axvline(x=value_at_25, color='r', 
+                             linestyle='--', linewidth=5, label = 'Lower 95% CR Bound for Estimate')
+    high_cr = subaxis.axvline(x=value_at_975, color='darkred', 
+                              linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
+    mean_est = subaxis.axvline(x=mu_post[i], color='c', 
+                               linestyle='--', linewidth=5, 
+                               label = 'Posterior Beta Coefficient Estimate for Predictor')
 
     subaxis.set_xlabel('$\\beta_{' + str(i) + '}$ Value', fontsize=30)
     subaxis.set_ylabel('Frequency', fontsize=30)
     if (i == 0):
-      subaxis.set_title('$(' + train_set.columns[i] + ') Histogram', fontsize=30)
-    subaxis.set_title('$X_{' + str(i) + '}$ Histogram (' + train_set.columns[i] + ')', fontsize=30)
+      subaxis.set_title(train_set.columns[i] + 'Histogram', fontsize=30)
+    else:
+      subaxis.set_title('$X_{' + str(i) + '}$ Histogram (' + train_set.columns[i] + ')', fontsize=30)
     subaxis.tick_params(axis='both', which='major', labelsize=20)
 
 lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
 lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
 fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=35, bbox_to_anchor=(0.5, 0.94))
 
-fig.suptitle('Histograms of Simulated Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors', fontsize=45, y=0.98)
+title = 'Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors'
+fig.suptitle(title,
+             fontsize=50, y=0.98)
 
 plt.tight_layout(rect=[0, 0, 1, 0.92])
 
@@ -482,6 +500,13 @@ for i in range(num_predictors, 15):
 
 plt.show()
 
+```
+
+```{=latex}
+Figure 2: Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors (with labels for 95\% credible regions and mean of posterior distributions)
+```
+
+```{python}
 #Plot for posterior distribution for sigma^2
 plt.hist(sigma2, bins=int(sampling_size/1000), alpha=1, color='orange')
 plt.xlabel('$\\sigma^2$ values')
@@ -492,10 +517,11 @@ plt.show()
 
 ```
 
-Figure 1: Simulated Bayesian Marginal Posterior Distributions and Credible Regions for Beta Coefficients of Predictors
-
 ```{=latex}
+Figure 3: Histogram of Simulated Posterior Distribution for $\sigma^2$
+\newpage
 ```
+
 **Results**
 
 ```{python, echo=FALSE}
@@ -504,18 +530,20 @@ bayesian_results = tabulate(beta_estimates, headers='keys', tablefmt='latex',
 
 with open('bayesian_results.tex', 'w') as f:
     f.write(bayesian_results)
+    
+f.close()
 ```
 
 ```{=latex}
 \input{bayesian_results.tex}
 \\
 \\
-Table 1: Summary of the Bayes estimates for the model parameters. It contains the Bayes estimates under the squared error loss, the variance of the estimates, and the 95\% credible region.
+Table 1: Summary of the Bayes estimates for the model parameters. It contains the Bayes estimates under the squared error loss (mean of posterior) and the 95\% credible region.
 ```
-We can see that our estimated Bayesian linear regression model is $\hat{Y} = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. This means that there's a 95% probability that 0 is a value for the parameters and hence, the predictors are not statistically significant. The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model.
+We can see in Table 1 that our estimated Bayesian linear regression model is $\hat{Y} = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. In the hypothesis testing framework, we are testing the null hypothesis that the beta coefficient for the predictor equals 0 agains the alternative that it does not equal 0. 0 being contained in the 95% credible regions for the Beta coefficients of $X_3, X_6$ indicates that these predictors are not statistically significant to explaining the median house prices in Boston towns (we accept the null hypothesis that the beta coefficients equal 0). The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model (we reject the null hypothesis that the beta coefficients equal 0).
 
 ```{python}
-#Compute MSE
+#Compute training and test MSE
 training_MSE = np.mean((y_training_set - X_training_set @ mu_post)**2)
 
 print(f"Training Set Bayesian MSE: {training_MSE}")
@@ -525,7 +553,7 @@ test_MSE = np.mean((y_test_set - X_test_set @ mu_post)**2)
 print(f"Test Set Bayesian MSE: {test_MSE}")
 ```
 
-We can see that the training MSE of our Bayesian model on a training set is around 20, while the test MSE is much higher at around 28. This could indicate slight overfitting in the training data (as we did not remove non-significant predictors in our final model).
+We can see that the training MSE of our Bayesian model on a training set is around 21.68 (not adjusted for #parameters), while the test MSE is higher at around 24.87. As the training and test MSE are similar, there does not seem to be too much overfitting occurring.
 
 ## Comparison Between Models
 
@@ -534,16 +562,17 @@ We will now compare the two methods based on their estimates for the $\beta$ coe
 ```{python, echo=FALSE}
 OLS_beta_estimates = pd.read_csv('full_model_summary.csv', index_col=0).rename(index={'(Intercept)': 'Intercept'})
 
-beta_estimates_comparison = beta_estimates.rename(columns={'Beta Estimate': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
+beta_estimates_comparison = beta_estimates.rename(columns={'Best Posterior Beta Estimate (under Squared Error Loss)': 'Bayesian Beta Estimate'}).drop('95% Credible Region', axis=1)
 
-beta_estimates_comparison['Beta Estimate Difference (OLS - Bayesian)'] = beta_estimates['Beta Estimate'] - OLS_beta_estimates['betaEstimate']
+beta_estimates_comparison['Beta Estimate Magnitude Difference (|OLS| - |Bayesian|)'] = abs(beta_estimates['Best Posterior Beta Estimate (under Squared Error Loss)']) - abs(OLS_beta_estimates['betaEstimate'])
 beta_estimates_comparison.insert(0, 'OLS Beta Estimate', OLS_beta_estimates['betaEstimate'])
 
 beta_estimates_table = tabulate(beta_estimates_comparison, headers='keys', tablefmt='latex',  numalign="left", stralign="left")
 
 with open('beta_estimates.tex', 'w') as f:
     f.write(beta_estimates_table)
-    
+
+f.close()
 ```
 
 ```{python, echo=FALSE}
@@ -560,6 +589,7 @@ beta_95_CI_CR_table = tabulate(beta_extra_info, headers='keys', tablefmt='latex'
 with open('beta_95_CI_CR_table.tex', 'w') as f:
     f.write(beta_95_CI_CR_table)
     
+f.close()
 ```
 
 ```{=latex}
@@ -567,7 +597,7 @@ with open('beta_95_CI_CR_table.tex', 'w') as f:
 \\
 Table 2: Comparison of the ordinary least squares estimates and the Bayes estimates of the parameters under the squared error loss of the model parameters.
 ```
-We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2 V)$ and $\sigma^2 \sim IG(a, b)$, where $\boldsymbol{m} = \boldsymbol{0}$, $V = 25 I$ ($I$ is the identity matrix), $a = 0.001$, and $b = 0.001$. We used this prior to simulate the posterior distribution for $\sigma^2$ and for each of the $\beta_j$ coefficients of the linear regression model. Above are the estimates and 95% credible regions of each parameter.
+As seen in Table 2, we can see that the Bayesian estimates for the $\beta$ coefficients are not much different compared to the ordinary least squares estimates. The last column of Table 2 shows the difference between the Bayesian and ordinary least squares estimates. The magnitude of the differences are all not very high (less than 1). This shows that the estimated linear regression models under both the ordinary least squares and the Bayesian framework are very similar. This is due to choosing a small $\lambda$ value in the Bayesian framework (the smaller $\lambda$ is chosen the less penalty is applied to large beta coefficients), resulting in a minor shrinkage in the beta coefficient estimates in the Bayesian setting. This small shrinkage in the Bayesian Beta coefficients estimates can be seen in the last column of the table. Negative values indicate that the Bayesian best estimates shrunk towards 0 compared to the ordinary least squares estimates, while positive values indicates they grew away from 0. It is evident that for the majority of Beta coefficients, our best estimates under the Bayesian setting became smaller than the ordinarly least squares best estimates.
 
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
@@ -575,11 +605,12 @@ We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \si
 
 Table 3: Comparison of the 95\% confidence intervals and the 95\% credible regions of the $\beta$ parameters.
 ```
-Table 4 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in terms of confidence intervals.
+Table 3 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in this regard. 
 
 ```{r}
-#Get the MSE version that adjusts for the number of parameters in the model
-training_MSE_adj <- (training_MSE*nrow(train_set_dataset))/(nrow(train_set_dataset)-length(coef(full_model)))
+#Get the MSE version that adjusts for the number of parameters in the model to estimate sigma^2
+training_MSE_adj <- (training_MSE*nrow(train_set_dataset))/
+                    (nrow(train_set_dataset)-length(coef(full_model)))
 cat("OLS sigma^2 best estimate:", training_MSE_adj)
 ```
 
@@ -589,24 +620,19 @@ sigma2 = 1 / np.random.gamma(shape=alpha_post, scale=1/r_post, size=sampling_siz
 mode = r_post/(alpha_post+1)
 mean = r_post/(alpha_post-1)
 variance = (r_post**2)/((alpha_post-1)**2 *(alpha_post-2))
-print(f"Statistics for sigma^2 prior \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
+print(f"Bayesian Posterior Statistics for sigma^2 \n Mode: {mode}, Mean: {mean}, Variance: {variance}")
 ```
 
-Compare the estimates for $\sigma^2$ between OLS and Bayesian methods here.
-
-We now compare the variance of the response variable (Median House Prices) under the ordinary least squares and the Bayesian framework. Under the ordinary least squares framework, the estimate for the variance is the mean squared error, or the mean sum of squares residuals. We obtain an estimate of 21.66596 (the training MSE from OLS). Under the Bayesian framework, we get that the estimate for the variance under the squared error loss is 21.506 and the MAP estimate is 21.242. This shows that the estimate for the variance of the median house price is similar under both the ordinary least squares and the Bayesian framework.
+We now compare the variance of the response variable (Median House Prices) under the ordinary least squares and the Bayesian framework. Under the ordinary least squares framework, the estimate for the variance is the mean squared error (we use the full model to be consistent among methods), or the mean sum of squares residuals. We obtain an estimate of 22.694 (the training MSE from OLS). Under the Bayesian framework, we get that the estimate for the variance under the squared error loss is 21.736 and the MAP (Maximum a Posterior) estimate is 21.462. This shows that the estimate for the variance of the error terms of the median house prices is similar under both the ordinary least squares and the Bayesian framework.
 
 # Conclusion/Future Steps
 
-All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. We analyzed the Boston Housing dataset using both OLS and Bayesian models. Overall, we found that the OLS and Bayesian estimates for the Beta coefficients and $\sigma^2$ were similar in both frameworks. Using the prior we picked for the Bayesian model, the estimates for the parameters are similar for both the ordinary least squares model and the Bayesian linear regression model. Utilizing different parameters for the priors in the Bayesian model could lead to vastly different estimates and affect the signifinance of the predictors. In the future, we could further explore in the Bayesian model prediction of new observations, hypothesis testing of multiple parameters, joint credible regions, choosing various types of distributions as priors (such as Jeffrey's prior), and transformations of our data to fix normality issues. 
+All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. We analyzed the Boston Housing dataset using both OLS and Bayesian models. Overall, we found that the OLS and Bayesian estimates for the Beta coefficients and $\sigma^2$ were similar in both frameworks. We note that utilizing different parameters for the priors in the Bayesian model could lead to vastly different estimates and affect the significance of the predictors. In the future, we could further explore in the Bayesian model how to create predictivie posterior distributions to predict new observations, hypothesis testing of multiple parameters, creating joint credible regions, choosing different types of distributions as priors (such as Jeffrey's prior), and transformations of our data.
 
 # References
 
-Note: These are not cited in proper format yet.
+5.1 - Ridge Regression. PennState. (2018). https://online.stat.psu.edu/stat857/node/155/ 
 
-3. <https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18>
+Montgomery, D. C., Peck, E. A., & Vining, G. G. (2021). Introduction to linear regression analysis (6th ed.).
 
-4. https://online.stat.psu.edu/stat857/node/155/
-
-Introduction to Linear Regression Analysis, sixth edition, 2021. Douglas C.
- Montgomery, Elizabeth A. Peck, G. Geoffrey Vining.
+Wundervald, B. (2019, June). Bayesian linear regression. https://doi.org/10.13140/RG.2.2.28385.97121
