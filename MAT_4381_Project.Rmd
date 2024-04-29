@@ -1,5 +1,5 @@
 ---
-title: "Comparing the Bayesian Linear Regression Model to Ordinary Least Squares"
+title: "Comparing the Bayesian Linear Regression Method to Ordinary Least Squares"
 author: "Joe Zhang and Christian Paravalos"
 date: "Winter 2024"
 output: pdf_document
@@ -17,13 +17,13 @@ Linear regression is often used to model relationships between a response variab
 
 # Introduction
 
-To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors associated with each observation, $n$ is the number of observations, and $k$ is the number of predictors The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have
+To model the relationship between a response variable and one or more explanatory variables, the simplest way to estimate a model is to assume that there is a linear relationship between the response variable and the predictor variables. The formulation of the model is $$\boldsymbol{y} = X\boldsymbol{\beta} + \boldsymbol{\epsilon} \text{, }$$ where $X$ is an $n \times k$ matrix with the observations of the explanatory variables, $\boldsymbol{y}$ is an $n \times 1$ vector of observations of the response variables, $\boldsymbol{\beta}$ is a $k \times 1$ vector of model parameters, and $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of random errors associated with each observation, $n$ is the number of observations, and $k$ is the number of predictors (plus the intercept term). The goal is to estimate $\boldsymbol{\beta}$ and then construct and evaluate the model from the estimated values. In other words, we have
 
 $$\boldsymbol{y} = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix} \text{, } \quad X = \begin{bmatrix} 1 & x_{11} & x_{12} & \cdots & x_{1(k-1)} \\ 1 & x_{21} & x_{22} & \cdots & x_{2(k-1)} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 1 & x_{n1} & x_{n2} & \cdots & x_{n(k-1)} \end{bmatrix} \text{, } \quad \boldsymbol{\beta} = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_{k-1} \end{bmatrix} \text{, } \quad \boldsymbol{\epsilon} = \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n \end{bmatrix}$$
 
 The most well-known way is to use the ordinary least squares method to estimate the parameters. The goal of this paper is to compare the ordinary least squares method with the Bayesian method of estimating parameters.
 
-#Ordinary Least Squares Regression Revisited (based on Montgomery, Peck, & Vining, 2021, pp. 12-91)
+# Ordinary Least Squares Regression Revisited
 
 ## Estimation of Model Parameters
 
@@ -35,9 +35,9 @@ We need to take derivatives of $S(\boldsymbol{\beta})$ with respect to $\boldsym
 
 If we set this equation to 0 and we solve for $\boldsymbol{\beta}$, we get $$X^TX\boldsymbol{\beta} = X^T\boldsymbol{y}$$
 
-If we multiply both sides by the inverse of $X^TX$, assuming that it is invertible, then the least squares estimator of $\boldsymbol{\beta}$ is $$\hat{\boldsymbol{\beta}} = (X^TX)^{-1}X^T\boldsymbol{y}$$. 
+If we multiply both sides by the inverse of $X^TX$, assuming that it is invertible, then the least squares estimator of $\boldsymbol{\beta}$ is $$\hat{\boldsymbol{\beta}} = (X^TX)^{-1}X^T\boldsymbol{y}.$$
 
-The fitted model is as follows: 
+The fitted model is as follows:
 
 $$\hat{\boldsymbol{y}} = X\hat{\boldsymbol{\beta}}$$
 
@@ -49,7 +49,7 @@ The least squares estimator of $\boldsymbol{\beta}$ has the following properties
   \item $Var[\hat{\boldsymbol{\beta}}] = \sigma^2 (X^TX)^{-1}$
 \end{itemize}
 ```
-## Estimation of Variance
+## Estimation of Variance of Error Terms
 
 In the frequentist approach, we estimate $\sigma^2$ using the residual sum of squares. We have $$SS_{res} = \sum_{i = 1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} e_i^2 = \boldsymbol{e}^T\boldsymbol{e}$$ where $\hat{y_i}$ are the fitted values of $y_i$ using the least squares model and $e_i = y_i - \hat{y}_i$ are the residuals. $\boldsymbol{e}$ is the vector of the residuals. If we simplify further, we get $$SS_{res} = \boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}$$
 
@@ -59,13 +59,13 @@ We can show that $$\mathbb{E}[MS_{res}] = \sigma^2$$
 
 Therefore, an unbiased estimator for $\sigma^2$ is given by $$\hat{\sigma^2} = MS_{res} = \frac{\boldsymbol{y}^T\boldsymbol{y} - \hat{\boldsymbol{\beta}}^TX^T\boldsymbol{y}}{n-k}$$
 
-## Inference on model parameters
+## Inference on Model Parameters
 
 ### t-tests
 
 After obtaining the estimates of the model parameters, we need to make inference on them. The main goal of inference is to determine if all the explanatory variables are significant to the model. Sometimes when there are too many variables, the accuracy of predictions using the model can decrease significantly. Making inferences can help decide if some variables should not be included in the final model.
 
-We have assumed that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$. This consequently leads to that $\boldsymbol{y} \sim N(X\boldsymbol{\beta}, \sigma^2I)$. Under this assumption, we can also get that $$\hat{\boldsymbol{\beta}} \sim N(\boldsymbol{\beta}, \sigma^2(X^TX)^{-1})$$
+We have assumed that $\boldsymbol{\epsilon} \sim N(\boldsymbol{0}, \sigma^2 I)$. This consequently leads to that $\boldsymbol{y}|X \sim N(X\boldsymbol{\beta}, \sigma^2I)$. Under this assumption, we can also get that $$\hat{\boldsymbol{\beta}} \sim N(\boldsymbol{\beta}, \sigma^2(X^TX)^{-1})$$
 
 From this, we can also deduce that $$\hat{\beta_j} \sim N(\beta_j, \sigma^2 (X^TX)^{-1}_{jj})$$ for $j = 1, 2, ..., k$ and $(X^TX)^{-1}_{jj}$ is the j-th diagonal element of the matrix $(X^TX)^{-1}$.
 
@@ -75,11 +75,13 @@ In practice, we do not know the value of $\sigma^2$, which we will need to use i
 
 If we want to test the null hypothesis $H_0: \beta_j = \beta_{j_0}$ against the hypothesis $H_1: \beta_j \neq \beta_{j_0}$, we have that under $H_0$ that $$t_0 = \frac{\hat{\beta_j} - \beta_{j_0}}{\sqrt{MS_{res}(X^TX)^{-1}_{jj}}} \sim t(n - k)$$
 
-$t_0$ is the test statistic for the hypothesis $\beta_j = \beta_{j_0}$. We reject $H_0$ if $|t_0| > t_{\alpha/2}(n-k)$, where $\alpha$ is the significance level and $t_{\alpha/2}(n-k)$ is the $100(1 - \alpha/2)$th quantile of the Student t distribution with $n - k$ degrees of freedom. We can also compute the p-value, which is $$p\text{-value} = P(|T| > |t_0|) = 2P(T > t_0)$$and we reject $H_0$ if the p-value is less than $\alpha$.
+$t_0$ is the test statistic for the hypothesis $\beta_j = \beta_{j_0}$. We reject $H_0$ if $|t_0| > t_{\alpha/2}(n-k)$, where $\alpha$ is the significance level and $t_{\alpha/2}(n-k)$ is the $100(1 - \alpha/2)$th quantile of the Student t distribution with $n - k$ degrees of freedom. We can also compute the p-value, which is $$p\text{-value} = 2P(T > |t_0|)$$and we reject $H_0$ if the p-value is less than $\alpha$.
 
 Another way to test the hypothesis $H_0$ against $H_1$ is to construct confidence intervals for the model parameters $\beta_j$. We can deduce that a $100(1 - \alpha)\%$ confidence interval for $\beta_j$ is $$\hat{\beta_j} \pm t_{\alpha/2}(n-k) \cdot \sqrt{MS_{res} (X^TX)^{-1}_{jj}}$$
 
 From the confidence interval, we accept $H_0$ if $\beta_{j_0}$ is contained in the interval. Otherwise, we reject $H_0$.
+
+Note that the above explanation of OLS regression was based on Montgomery, Peck, & Vining, 2021, pp. 12-91.
 
 # Bayesian Linear Regression
 
@@ -91,7 +93,7 @@ We make the same assumptions as in the ordinary least squares framework, where $
 
 ### Likelihood Function
 
-With the assumption, we have that $$\boldsymbol{y} \sim N_n(X\boldsymbol{\beta}, \sigma^2I)$$
+With the assumption, we have that $$\boldsymbol{y}|X, \boldsymbol{\beta}, \sigma^2 \sim N_n(X\boldsymbol{\beta}, \sigma^2I)$$
 
 Therefore, the likelihood function is $$f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) = \frac{1}{(2\pi)^{n/2}(\sigma^2)^{n/2}} \exp \left[-\frac{1}{2\sigma^2}(\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right]$$
 
@@ -99,7 +101,8 @@ Therefore, the likelihood function is $$f(\boldsymbol{y}| X, \boldsymbol{\beta},
 
 To estimate $\boldsymbol{\beta}$ and $\sigma^2$, we treat them as random variables and we make a prior assumption on their distribution. The assumptions we will use are $$\boldsymbol{\beta}|\sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2V)$$ and $$\sigma^2 \sim IG(a, b)$$ where $\boldsymbol{m}$ is a $k \times 1$ vector of real numbers, $V$ is a $k \times k$ matrix of real numbers, and $a$ and $b$ are both real numbers.
 
-Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsymbol{\beta}, \sigma^2) = g(\boldsymbol{\beta} | \sigma^2)g(\sigma^2)$$ where $$g(\boldsymbol{\beta}|\sigma^2) = \frac{1}{(2\pi \sigma^2)^{k/2}}|V|^{-\frac{k}{2}} \exp \left(-\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right)$$ and $$g(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-(a+1)} \exp \left( -\frac{b}{\sigma^2} \right)$$
+Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsymbol{\beta}, \sigma^2) = g(\boldsymbol{\beta} | \sigma^2)g(\sigma^2)$$ where $$g(\boldsymbol{\beta}|\sigma^2) = \frac{1}{(2\pi \sigma^2)^{k/2}}|V|^{-\frac{1}{2}} \exp \left(-\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right)$$ and $$g(\sigma^2) = \frac{b^a}{\Gamma(a)} (\sigma^2)^{-(a+1)} \exp \left( -\frac{b}{\sigma^2} \right)$$
+for $\sigma^2 > 0$.
 
 ### Computation of posterior distribution
 
@@ -111,7 +114,7 @@ Now that we have the likelihood function and the prior probability distribution 
     h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)
     & \propto f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) g(\boldsymbol{\beta}, \sigma^2) \\
     & \propto f(\boldsymbol{y}| X, \boldsymbol{\beta}, \sigma^2) g(\boldsymbol{\beta} | \sigma^2) g(\sigma^2) \\
-    & \propto (2 \pi \sigma^2)^{-\frac{n}{2}} \exp \left( -\frac{1}{2\sigma^2} (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right) (2 \pi \sigma^2)^{-\frac{k}{2}} |V|^{-\frac{k}{2}} \exp \left( -\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right) \\
+    & \propto (2 \pi \sigma^2)^{-\frac{n}{2}} \exp \left( -\frac{1}{2\sigma^2} (\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) \right) (2 \pi \sigma^2)^{-\frac{k}{2}} |V|^{-\frac{1}{2}} \exp \left( -\frac{1}{2\sigma^2} (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) \right) \\
     & \times \frac{b^a}{\Gamma(a)} (\sigma^2)^{-(a+1)} \exp \left(-\frac{b}{\sigma^2} \right) \\
     & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} [(\boldsymbol{y} - X\boldsymbol{\beta})^T(\boldsymbol{y} - X\boldsymbol{\beta}) + (\boldsymbol{\beta} - \boldsymbol{m})^TV^{-1}(\boldsymbol{\beta} - \boldsymbol{m}) + 2b] \right) \\
     & \propto (\sigma^2)^{-\frac{n}{2} - \frac{k}{2} - (a + 1)} \exp \left( -\frac{1}{2 \sigma^2} A \right)
@@ -161,17 +164,18 @@ Now, we go back to the posterior distribution and we can write:
 ```
 From looking at the posterior distribution, we can see that it is the product of a multivariate normal distribution and an inverse gamma distribution. We can parameterize the posterior the following way:
 
-$$h(\boldsymbol{\beta}, \sigma^2| \boldsymbol{y}, X) = h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X)h(\sigma^2|\boldsymbol{y}, X)$$ where $$h(\boldsymbol{\beta}| \sigma^2, \boldsymbol{y}, X) = \frac{1}{(2 \pi \sigma^2)^{\frac{k}{2}}} \exp \left( -\frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2\sigma^2}\right)$$ and $$h(\sigma^2| \boldsymbol{y}, X) = \frac{(\frac{1}{2}(\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}))^{\frac{n}{2} + a}}{\Gamma(a + \frac{n}{2})} (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( -\frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2 \sigma^2}\right)$$ Then we get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda)$$ and $$\sigma^2| \boldsymbol{y}, X \sim IG(\alpha, r)$$ where $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1} \boldsymbol{m})$$ $$\Lambda = (X^TX + V^{-1})^{-1}$$ $$\alpha = a + \frac{n}{2}$$ $$r = \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2}$$
+$$h(\boldsymbol{\beta}, \sigma^2| \boldsymbol{y}, X) = h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X)h(\sigma^2|\boldsymbol{y}, X)$$ where $$h(\boldsymbol{\beta}| \sigma^2, \boldsymbol{y}, X) = \frac{1}{(2 \pi \sigma^2)^{\frac{k}{2}}}|\Lambda|^{-\frac{1}{2}} \exp \left( -\frac{(\boldsymbol{\beta} - \boldsymbol{\mu})^T \Lambda^{-1} (\boldsymbol{\beta} - \boldsymbol{\mu})}{2\sigma^2}\right)$$ and $$h(\sigma^2| \boldsymbol{y}, X) = \frac{(\frac{1}{2}(\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}))^{\frac{n}{2} + a}}{\Gamma(a + \frac{n}{2})} (\sigma^2)^{-(\frac{n}{2} + a + 1)} \exp \left( -\frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2 \sigma^2}\right)$$ for $\sigma^2 > 0$. 
+Then we get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda)$$ and $$\sigma^2| \boldsymbol{y}, X \sim IG(\alpha, r)$$ where $$\boldsymbol{\mu} = (X^TX + V^{-1})^{-1}(X^T\boldsymbol{y} + V^{-1} \boldsymbol{m})$$ $$\Lambda = (X^TX + V^{-1})^{-1}$$ $$\alpha = a + \frac{n}{2}$$ $$r = \frac{\boldsymbol{m}^TV^{-1}\boldsymbol{m} - \boldsymbol{\mu}^T\Lambda^{-1}\boldsymbol{\mu} + 2b + \boldsymbol{y}^T\boldsymbol{y}}{2}$$
 
 ## Making Bayesian inference
 
 We now have the posterior distribution of $(\boldsymbol{\beta}, \sigma^2)$. From that, we also get that $$\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X \sim N_k(\boldsymbol{\mu}, \sigma^2 \Lambda)$$ and $$\sigma^2 | \boldsymbol{y}, X \sim IG(\alpha, r)$$
 
-The main goal is to estimate the parameters. We first need to find the marginal distribution of $\boldsymbol{\beta}$. This is hard to do by hand since we have to solve the following integral: $$h(\boldsymbol{\beta} | \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X) \, d(\sigma^2)$$ Therefore, we need to use computational methods to simulate the posterior marginal distribution for $\boldsymbol{\beta}$.
+The main goal is to estimate the parameters. We first need to find the marginal distribution of $\boldsymbol{\beta}$. This is hard to do by hand since we have to solve the following integral: $$h(\boldsymbol{\beta} | \boldsymbol{y}, X) = \int_{0}^{\infty} h(\boldsymbol{\beta} | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X) \, d(\sigma^2)$$ Therefore, we need to use computational methods to simulate the posterior marginal distribution for $\boldsymbol{\beta}$.
 
-To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$. Then the marginal distribution for $\beta_j$ is $$h(\beta_j| \boldsymbol{y}, X) = \int_{-\infty}^{\infty} h(\beta_j | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X)\, d(\sigma^2)$$ This integral is also hard to compute, so we need to use computational methods.
+To make inference on individual parameters, we have that since $\boldsymbol{\beta}$ follows a multivariate normal distribution, so we can also conclude that for any model parameter $\beta_j$, we get that $$\beta_j | \sigma^2, \boldsymbol{y}, X \sim N(\mu_j, \sigma^2  \Lambda_{jj})$$ where $\mu_j$ is the j-th element of the vector $\boldsymbol{\mu}$ and $\Lambda_{jj}$ is the j-th diagonal element of the matrix $\Lambda$. Then the marginal distribution for $\beta_j$ is $$h(\beta_j| \boldsymbol{y}, X) = \int_{0}^{\infty} h(\beta_j | \sigma^2, \boldsymbol{y}, X) h(\sigma^2| \boldsymbol{y}, X)\, d(\sigma^2)$$ This integral is also hard to compute, so we need to use computational methods.
 
-Given the marginal distribution, we can use it to find the mean and variance of $\beta_j$ and we can also construct credible regions to decide if the explanatory variable associated with the parameter is significant to the model. A $100(1 - \alpha)\%$ credible region for a parameter $\beta_j$ is the region $I$ such that $P(\beta_j \in I | \text{Data}) = 1 - \alpha$. There are many different such regions, but our goal is to find the shortest credible region since we want a more accurate estimate. If the $95\%$ credible region contains 0, then we can conclude that the parameter and its associated explanatory variable is not significant to the model. Otherwise, we conclude that it is significant.
+Given the marginal distribution, we can use it to find the mean of $\beta_j$ (best estimate under squared error loss) and we can also construct credible regions to decide if the explanatory variable associated with the parameter is significant to the model. A $100(1 - \alpha)\%$ credible region for a parameter $\beta_j$ is the region $I$ such that $P(\beta_j \in I | \text{Data}) = 1 - \alpha$. There are many different such regions, but our goal is to find the shortest credible region since we want a more accurate estimate. If the shortest $95\%$ credible region contains 0, then we can conclude that the parameter and its associated explanatory variable are not significant to the model. Otherwise, we conclude that they are significant.
 
 ## Simulation Algorithm to Compute Posterior
 
@@ -191,7 +195,7 @@ To simulate the marginal distribution for a parameter $\beta_j$, we can use the 
 
 # Application
 
-Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset (Harrison & Rubinfeld, 1978).
+Now we have established the theory behind Bayesian linear regression, we will compare the Bayesian linear regression model to the ordinary least squares model on the Boston Housing dataset. The data was derived from information collected by the U.S. Census Service concerning housing in the area of Boston, Massachusetts (Harrison & Rubinfeld, 1978). Note that it is believed that the median house prices were censored past 50 (\$50,000).
 
 ## Data Description and Preprocessing
 
@@ -238,7 +242,6 @@ To make things easier to read, we will be using the following notations for vari
   \item $Y: MEDV$
 \end{itemize}
 ```
-Dataset Source: The data were derived from information collected by the U.S. Census Service concerning housing in the area of Boston, Massachusetts. Note that it is believed that the median house prices were censored past 50 ($50,000).
 
 We first divide the data into training and test sets randomly:
 
@@ -273,8 +276,8 @@ write.csv(test_set_dataset, "test_set_dataset.csv", row.names = FALSE)
 #Draw plot of MEDV
 ggplot(train_set_dataset, aes(x = MEDV)) +
   geom_histogram(bins = 20, fill = "#7b79d4", color = "#0e0d42") +
-  labs(title = "Histogram of Median value of owner-occupied homes in $1000s (MEDV)", 
-       x = "Median Value of Owner-Occupied Homes ($1000s)", y = "Frequency") + 
+  labs(title = "Histogram of Median Value of Owner-Occupied Homes in $1000s (MEDV)", 
+       x = "Median Value of Owner-Occupied Homes (in $1000s)", y = "Frequency") + 
   theme_minimal() 
 
 ```
@@ -282,25 +285,27 @@ ggplot(train_set_dataset, aes(x = MEDV)) +
 ```{=latex}
 
 Figure 1: Histogram of median value of owner-occupied homes in \$1000s (response/target variable of regression)
-
 ```
-
-As seen in Figure 1, the response variable MEDV is somewhat normally distributed, with some outliers around 50. This is a result of the median house prices being censored past $50,000 in the dataset. 
-
+As seen in Figure 1, the response variable MEDV is somewhat normally distributed, with a build up of data points around 50. This is a result of the median house prices being censored past \$50,000 in the dataset.
 
 ## Ordinary Least Squares Model
 
-We first fit a linear regression model under the frequentist framework. Then we make inference and evaluate the quality of the model. We consider 2 possible models: one using all predictors and one that is selected using stepwise selection. (Note we will not talk about $R^2$ or ANOVA/F-tests between full and reduced models as these are not directly applicable to our Bayesian setting).
+We first fit a linear regression model under the frequentist framework. Then we make inference and evaluate the quality of the model. We consider 2 possible models: one using all predictors and one that is selected using stepwise selection. (Note we wanted to explain the $R^2$, ANOVA/F-tests between full and reduced models, significance of regression, and analysis of the residuals, but as we have not developed the theory for similar methods in the Bayesian setting, so we will not go through them in this paper to be consistent).
 
 We first fit the full model with all variables:
-
-We have that the full frequentist linear regression model fitted using the training dataset is $\hat{Y} = 32.044484 - 0.121517 X_1 + 0.042545 X_2 + 0.066926 X_3 - 13.994681 X_4 + 4.021977 X_5 - 0.004531 X_6 - 1.469667 X_7 + 0.343192 X_8 - 0.014404 X_9 - 0.855679 X_{10} + 0.011628 X_{11} - 0.0629198 X_{12}$, where the variables are as described in the previous section. From looking at the summary table of the model, we see that the variables $X_3$ (INDUS) and $X_6$ (AGE) are not statistically significant under the significance level $\alpha = 0.05$ because the p-values from the t tests are greater than 0.05.
 
 ```{r}
 
 full_model=lm(MEDV ~ .,data=train_set_dataset)
 
 summary(full_model)
+
+```
+
+We have that the full frequentist linear regression model fitted using the training dataset is $\hat{Y} = 32.0445 - 0.122 X_1 + 0.043 X_2 + 0.067 X_3 - 13.995 X_4 + 4.022 X_5 - 0.005 X_6 - 1.470 X_7 + 0.343 X_8 - 0.014 X_9 - 0.856 X_{10} + 0.012 X_{11} - 0.063 X_{12}$, where the variables are as described in the previous section. From looking at the summary table of the model, we see that the variables $X_3$ (INDUS) and $X_6$ (AGE) are not statistically significant under the significance level $\alpha = 0.05$ because the p-values from the t tests are greater than 0.05.\
+
+We now compute training and test MSE:
+```{r}
 
 RSS <- residuals(full_model)^2
 
@@ -328,9 +333,9 @@ write.csv(data.frame(
 
 ```
 
-We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547. Note that the MSE used does not account for the number of parameters in the model as we wanted to be consistent between the training and test MSE computations, where in the test setting the number of parameters is not as relevant (want lowest test error independent of #parameters). If we accounted for the number of parameters in the model, we would get a training MSE of 22.62725.
+We will evaluate the model using the training and test MSE (Mean Square Error). The training error is 21.666 and the test error is 24.705. Note that the MSE used does not account for the number of parameters in the model as we wanted to be consistent between the training and test MSE computations, where in the test setting the number of parameters is not as relevant (want lowest test error independent of #parameters). If we accounted for the number of parameters in the model, we would get a training MSE of 22.627.
 
-Now, we build a reduced linear regression model using stepwise selection (allow predictors to enter the model with p-value of t-test less than 10% and be removed with p-value of t-test greater than 15% (p-value/t-test is computed based on the model at that current step of the stepwise process)):
+Now, we build a reduced linear regression model using stepwise selection (allow predictors to enter the model with p-value of t-test less than 10% and be removed with p-value of t-test greater than 15% (p-value/t-test is computed based on the model developed at that current step of the stepwise process)):
 
 ```{r}
 
@@ -340,6 +345,12 @@ stepwise_model <- lm(MEDV ~ CRIM + ZN + NX + RM + DIS + RAD + TAX + PTRATIO + B 
                      data = train_set_dataset)
 
 summary(stepwise_model)
+
+```
+
+We have that the reduced model selected via stepwise regression is $\hat{Y} = 31.665 - 0.123X_1 + 0.043X_2 - 13.172X_4 + 3.952X_5 -1.508X_7 + 0.325 X_8 - 0.013 X_9 - 0.824 X_{10} + 0.011 X_{11} - 0.626X_{12}$. All predictors are statistically significant in this model based on the t-tests, indicating that we removed the non-significant predictors from the full model that were not significantly explaining the median home prices.
+
+```{r}
 
 RSS <- residuals(stepwise_model)^2
 
@@ -366,9 +377,7 @@ write.csv(data.frame(
   upper95CIBound = confint(stepwise_model, level = 0.95)[, "97.5 %"]), "stepwise_model_summary.csv", row.names = TRUE)
 ```
 
-We have that the reduced model selected via stepwise regression is $\hat{Y} = 31.664864 - 0.123388X_1 + 0.042781X_2 - 13.171578X_4 + 3.951521X_5 -1.507618X_7 + 0.325008 X_8 - 0.012985 X_9 - 0.823535 X_{10} + 0.011428 X_{11} - 0.626362X_{12}$. All predictors are statistically significant in this model based on the t-tests, indicating that we removed the non-significant predictors from the full model that were not significantly explaining the median home prices. 
-
-After evaluating the model, we obtain that the training MSE is 21.73032 and the test MSE is 24.52705. The training MSE that accounts for the number of parameters in the model is 22.5406, which is slightly lower than the one for the full model. This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly worse than the reduced model. Note that the test MSE is also slightly lower with this model. 
+After evaluating the model, we obtain a training MSE of 21.730 and test MSE of 24.527. The training MSE that accounts for the number of parameters in the model is around 22.540, which is slightly lower than the one for the full model (which was 22.627). This indicates that the reduced model, when penalizing for the increase in parameters in the full model, explains the model slightly better than the full model (captures less noise). Note that the test MSE is also slightly lower with this model, which is a further confirmation that removing the non-significant predictors $X_3$ and $X_6$ from the model improved predictions ever so slightly (on another test dataset the difference between the two test MSE may be larger). Remember that the median house prices are given in \$1000s, so the test MSE signify that the mean square error on the test dataset for the full and reduced models are around \$24,705 and \$24,527, respectively.
 
 ## Bayesian Linear Regression Model
 
@@ -376,9 +385,9 @@ After evaluating the model, we obtain that the training MSE is 21.73032 and the 
 
 We must now choose the prior parameters for each of the prior distributions.
 
-For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression (Montgomery, Peck, & Vining, 2021, pp. 312-315). The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
+For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$), where $I$ is the identity matrix and $\lambda \geq 0$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression (Montgomery, Peck, & Vining, 2021, pp. 312-315). The larger $\lambda$ is, the more shrinking of estimates occur toward 0, with the goal of making the beta coefficient estimates of non-significant predictors close to 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by minimizing the influence of unexplanatory predictors (want to capture less noise that is mistaken for signal in the model). We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
 
-For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable (James, Witten, Hastie, & Tibshirani, 2013, p. 63). We picked a prior that tries to minimize the variance of the random error because we believe that our data source is high quality and we believe that our model is a good fit with minimal error. As seen below, the distribution has a mode of 12.5, mean of 18.75 (both relatively low), and variance of 36.5 indicating that we are not overconfident in our prior. We ensured that the distribution tails off quickly past around 50, which is the set bound on the response variable MEDV.
+For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable (James, Witten, Hastie, & Tibshirani, 2013, p. 63). We picked a prior that tries to minimize the variance of the random error because we believe that our data source is high quality (from U.S. Census Service),  that our predictors capture the majority of key factors influencing median home prices, and that the true relationship between the predictors and median home prices is approximately linear. As seen below, the prior distribution chosen has a mode of 12.5, mean of 18.75 (both relatively low), and variance of 36.5 indicating that we are not overconfident in our prior. We ensured that the distribution tails off quickly past around 50, which is the maximum value of the median home prices in the population that this dataset was sampled from (since any price above \$50,000 was censored to \$50,000).
 
 ```{python, echo=FALSE}
 import numpy as np
@@ -423,13 +432,13 @@ plt.show()
 ```
 
 ```{=latex}
-Figure 2: Histogram of Simulated Distribution of Prior for $\sigma^2$ ($IG(5, 75)$)
+Figure 2: Histogram of Simulated Distribution of Prior for $\sigma^2$
 \newpage
 ```
 
 **Algorithm**
 
-We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{1, \dots, 12\}$, with the $i^{th}$ $\beta$ corresponding to the $i^{th}$ predictor ($X_i$) ($\beta_0$ is intercept term).
+We now execute the algorithm for finding the posterior distribution for $\sigma^2$ and the marginal posterior distributions for $\beta_i, i \in \{1, \dots, 12\}$, with the $i^{th}$ $\beta$ coefficeint ($\beta_i$) corresponding to the $i^{th}$ predictor ($X_i$) ($\beta_0$ is intercept term).
 
 ```{python}
 
@@ -449,14 +458,14 @@ sampling_size = 30000
 #Compute the inverse of V
 V_inv = np.linalg.inv(V)
 
-#Compute the mean of the posterior distribution of beta given sigma2 (normal)
+#Compute the mean vector of the posterior distribution of beta given sigma2 (normal)
 mu_post = (np.linalg.inv(X_training_set.T @ X_training_set + V_inv) 
            @ (X_training_set.T @ y_training_set + V_inv @ m))
 
 #Compute the lambda matrix of the posterior distribution of beta given sigma2 (normal)
 lambda_post = np.linalg.inv(X_training_set.T @ X_training_set + V_inv)
 
-#Compute alpha and r paramater of sigma2 posterior distribution (inverse gamma)
+#Compute alpha and r paramater of sigma2 posterior distribution (IG(alpha, r))
 alpha_post = a + len(y_training_set) / 2
 r_post = (m.T @ V_inv @ m - mu_post.T @ np.linalg.inv(lambda_post) 
           @ mu_post + 2*b + y_training_set.T @ y_training_set) / 2
@@ -497,24 +506,24 @@ for i in range(num_predictors):
     n, bins, patches = subaxis.hist(beta_hat[:, i], 
                                     bins=int(sampling_size / 1000), color=colors(i), alpha=1)
     low_cr = subaxis.axvline(x=value_at_25, color='r', 
-                             linestyle='--', linewidth=5, label = 'Lower 95% CR Bound for Estimate')
+                             linestyle='--', linewidth=5, label = 'Lower 95% CR Bound for $\\beta_i$ Posterior')
     high_cr = subaxis.axvline(x=value_at_975, color='darkred', 
-                              linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for Estimate')
+                              linestyle='--',linewidth=5, label = 'Upper 95% CR Bound for $\\beta_i$ Posterior')
     mean_est = subaxis.axvline(x=mu_post[i], color='c', 
                                linestyle='--', linewidth=5, 
-                               label = 'Posterior Beta Coefficient Estimate for Predictor')
+                               label = '$\\beta_i$ A Posterior Best Estimate (under Squared Error Loss)')
 
     subaxis.set_xlabel('$\\beta_{' + str(i) + '}$ Value', fontsize=30)
     subaxis.set_ylabel('Frequency', fontsize=30)
     if (i == 0):
-      subaxis.set_title(train_set.columns[i] + 'Histogram', fontsize=30)
+      subaxis.set_title(train_set.columns[i] + ' Histogram', fontsize=30)
     else:
       subaxis.set_title('$X_{' + str(i) + '}$ Histogram (' + train_set.columns[i] + ')', fontsize=30)
     subaxis.tick_params(axis='both', which='major', labelsize=20)
 
 lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][1:2]
 lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=35, bbox_to_anchor=(0.5, 0.94))
+fig.legend(lines, labels, loc='upper center', ncol=3, fontsize=30, bbox_to_anchor=(0.5, 0.94))
 
 title = 'Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors'
 fig.suptitle(title,
@@ -530,15 +539,14 @@ plt.show()
 ```
 
 ```{=latex}
-Figure 3: Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors (with labels for 95\% credible regions and mean of posterior distributions)
+Figure 3: Histograms of Simulated Marginal Posterior Distributions for Beta Coefficients of Predictors (with labels for 95\% credible regions and mean of posterior distributions (best estimate for each beta coefficient under squared error loss))
 ```
-
 ```{python}
 #Plot for posterior distribution for sigma^2
 plt.hist(sigma2, bins=int(sampling_size/1000), alpha=1, color='orange')
 plt.xlabel('$\\sigma^2$ values')
 plt.ylabel('Frequency')
-plt.title('Histogram of Simulated Posterior Distribution for $\\sigma^2$')
+plt.title('Histogram of Simulated Posterior Distribution for $\\sigma^2$ ' + f'IG({int(alpha_post)}, {int(r_post)})')
 plt.legend()
 plt.show()
 
@@ -548,7 +556,6 @@ plt.show()
 Figure 4: Histogram of Simulated Posterior Distribution for $\sigma^2$
 \newpage
 ```
-
 **Results**
 
 ```{python, echo=FALSE, warning=FALSE, message=FALSE}
@@ -602,7 +609,6 @@ with open('beta_estimates.tex', 'w') as f:
 f.close()
 ```
 
-
 ```{python, echo=FALSE, warning=FALSE, message=FALSE}
 OLS_beta_estimates = pd.read_csv('stepwise_model_summary.csv', index_col=0).rename(index={'(Intercept)': 'Intercept'})
 
@@ -648,10 +654,9 @@ As seen in Table 2, we can see that the Bayesian estimates for the $\beta$ coeff
 \\
 Table 3: Comparison of the ordinary least squares estimates (reduced/stepwise model) and the Bayes estimates of the parameters under the squared error loss of the model parameters.
 ```
-
 Similarly to the full model, the reduced/stepwise model produces similar results to the Bayesian model for the Beta coefficient estimates as seen in Table 3. Among most coefficient estimates, the differences are slightly smaller than with the full model. We also have more beta coefficients in the Bayesian model that are slightly greater than the reduced model estimates than with the full model.
 
-If we look at the training and test MSE from all three models, they are all extremely similar, indicating that they all fit the model relatively the same. 
+If we look at the training and test MSE from all three models, they are all extremely similar, indicating that they all fit the model relatively the same.
 
 ```{=latex}
 \input{beta_95_CI_CR_table.tex}
@@ -659,7 +664,7 @@ If we look at the training and test MSE from all three models, they are all extr
 
 Table 4: Comparison of the 95\% confidence intervals (from full OLS model) and the 95\% credible regions of the $\beta$ parameters.
 ```
-Table 4 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in this regard. 
+Table 4 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in this regard.
 
 ```{r}
 #Get the MSE version that adjusts for the number of parameters in the model to estimate sigma^2
@@ -691,4 +696,4 @@ James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). *An introduction to 
 
 Montgomery, D. C., Peck, E. A., & Vining, G. G. (2021). *Introduction to linear regression analysis* (6th ed.).
 
-Wundervald, B. (2019, June). Bayesian linear regression. https://doi.org/10.13140/RG.2.2.28385.97121
+Wundervald, B. (2019, June). Bayesian linear regression. <https://doi.org/10.13140/RG.2.2.28385.97121>
