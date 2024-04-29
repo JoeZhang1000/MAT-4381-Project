@@ -99,7 +99,7 @@ Then, we get that the prior for $(\boldsymbol{\beta}, \sigma^2)$ is $$g(\boldsym
 
 ### Computation of posterior distribution
 
-Now that we have the likelihood function and the prior probability distribution of the parameters, we can now compute the posterior distribution of the parameters. We let $h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)$ represent the posterior distribution function:
+Now that we have the likelihood function and the prior probability distribution of the parameters, we can now compute the posterior distribution of the parameters. We will follow a similar procedure to [3]. We let $h(\boldsymbol{\beta}, \sigma^2 | \boldsymbol{y}, X)$ represent the posterior distribution function:
 
 ```{=tex}
 \begin{equation*}
@@ -304,6 +304,13 @@ write.csv(data.frame(
 
 We then evaluated the model using both the training dataset and the test dataset. The training error is 21.66596 and the test error is 24.70547. Note that the MSE used does not account for the number of parameters in the model as we wanted to be consistent between the training and test MSE computations, where in the test setting the number of parameters is not as relevant (want lowest test error). If we accounted for the number of parameters in the model, we would get a training MSE of 22.62725.
 
+```{r}
+ par(mfrow = c(2, 2))
+ plot(full_model)
+```
+
+We now looked at model diagnostics. We find that we can assume that the variance of the error terms are constant and we can also assume that the relationship is linear from looking at the residual vs. fitted plot. This is because the points don't follow a noticeable pattern. However, from looking at the qq-plot, the assumption that the random errors are normally distributed may not be reasonable for this specific dataset.
+
 Now, we build a reduced linear regression model using stepwise selection:
 
 ```{r}
@@ -341,9 +348,9 @@ After evaluating the model, we obtain that the training MSE is 21.73032 and the 
 
 We must now choose the prior parameters for each of the prior distributions.
 
-For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting).
+For setting the parameters for the joint prior for the $\beta$ coefficients (given $\sigma^2$), we will set $\boldsymbol{m}=0$ (mean of each beta coefficient is set to 0) and $V$ to $25I$. Now, when we set the means to 0 and $V^{-1}$ to $\lambda I$ (in other words $V=\frac{1}{\lambda}I$) ($\lambda = \frac{1}{25}$ in this case), where $I$ is the identity matrix and $\lambda \in \mathbb{R}$, we can see that the posterior best estimates under squared error loss for the $\beta$ parameters are the same as in the frequentist method of ridge regression. The larger $\lambda$ is, the more shrinking of non-significant estimates occurs towards 0. The purpose of this is to attempt to not overfit the training data while being able to more easily generalize to unseen data by not capturing as much noise and potentially unexplanatory predictors. We set $\lambda=\frac{1}{25}$ to balance the potential for overfitting versus underfitting the model (too large a $\lambda$ value could lead to underfitting) [4].
 
-For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. 
+For the prior for $\sigma^2$, we used the $IG(a, b)$ prior with $a = 5$ and $b = 75$. $\sigma^2$ is the variance of the random error terms. Error comes up from what we miss from the model we choose, such as if the true relationship is not linear, if there are measurement errors, or if there are other lurking variables that cause variation in the response variable. We picked a prior that tries to minimize the variance of the random error because we assume that our data is high quality and we assume that our model is a good fit with minimal error.
 
 ```{python, echo=FALSE}
 import numpy as np
@@ -503,9 +510,9 @@ with open('bayesian_results.tex', 'w') as f:
 \input{bayesian_results.tex}
 \\
 \\
-Table 1: Bayesian Posterior Beta Coefficients Estimates Summary \\
+Table 1: Summary of the Bayes estimates for the model parameters. It contains the Bayes estimates under the squared error loss, the variance of the estimates, and the 95\% credible region.
 ```
-We can see that our estimated Bayesian linear regression model is $Y = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. This means that there's a 95% probability that 0 is a value for the parameters and hence, the predictors are not statistically significant. The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model.
+We can see that our estimated Bayesian linear regression model is $\hat{Y} = 29.2027 - 0.119609X_1 + 0.0434526X_2 + 0.0626662X_3 - 12.4738 X_4 + 4.16421 X_5 - 0.00535482 X_6 - 1.43013 X_7 + 0.333189 X_8 - 0.0142721 X_9 - 0.807487 X_{10} + 0.0119776 X_{11} - 0.624253 X_{12}$. From the 95% credible regions of the parameters, we can see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), their credible regions contain 0. This means that there's a 95% probability that 0 is a value for the parameters and hence, the predictors are not statistically significant. The credible regions for the other parameters don't contain 0, which means that they are statistically significant to the model.
 
 ```{python}
 #Compute MSE
@@ -558,7 +565,7 @@ with open('beta_95_CI_CR_table.tex', 'w') as f:
 ```{=latex}
 \input{beta_estimates.tex}
 \\
-Table 2: $\beta$ Coefficient Estimates Comparison between OLS and Bayesian method
+Table 2: Comparison of the ordinary least squares estimates and the Bayes estimates of the parameters under the squared error loss of the model parameters.
 ```
 We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \sigma^2 V)$ and $\sigma^2 \sim IG(a, b)$, where $\boldsymbol{m} = \boldsymbol{0}$, $V = 25 I$ ($I$ is the identity matrix), $a = 0.001$, and $b = 0.001$. We used this prior to simulate the posterior distribution for $\sigma^2$ and for each of the $\beta_j$ coefficients of the linear regression model. Above are the estimates and 95% credible regions of each parameter.
 
@@ -566,7 +573,7 @@ We used a prior with $\boldsymbol{\beta} | \sigma^2 \sim N_k(\boldsymbol{m}, \si
 \input{beta_95_CI_CR_table.tex}
 \\
 
-Table 3: $\beta$ Coefficient Estimates $95\%$ Confidence Intervals/Credible Region Comparison between OLS and Bayesian method
+Table 3: Comparison of the 95\% confidence intervals and the 95\% credible regions of the $\beta$ parameters.
 ```
 Table 4 above compares the 95% confidence intervals of the parameters under the ordinary least squares framework and the 95% credible regions of the parameters under the Bayesian framework. From looking at the table, the bounds of the credible regions are not much different compared to the bounds of the confidence intervals. We can also see that for the predictors $X_3$ (INDUS) and $X_6$ (AGE), the 95% confidence intervals and credible regions for the parameters both contain 0. This means that under both frameworks, we can conclude that the predictors $X_3$ and $X_6$ are not statistically significant to the model. Overall, the two methods match pretty closely in terms of confidence intervals.
 
@@ -591,14 +598,15 @@ We now compare the variance of the response variable (Median House Prices) under
 
 # Conclusion/Future Steps
 
-All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. We see that using the prior we picked for the Bayesian model, the estimates for the parameters are similar for both the ordinary least squares model and the Bayesian linear regression model. With the Bayesian model, we could further explore prediction of new observations, hypothesis testing of multiple parameters, and transformations.
+All in all, we explored the differences between Ordinary Least Squares Regression (Frequentist Method) and the Bayesian method of settings priors to find posterior distributions for the model parameters. We analyzed the Boston Housing dataset using both OLS and Bayesian models. Overall, we found that the OLS and Bayesian estimates for the Beta coefficients and $\sigma^2$ were similar in both frameworks. Using the prior we picked for the Bayesian model, the estimates for the parameters are similar for both the ordinary least squares model and the Bayesian linear regression model. Utilizing different parameters for the priors in the Bayesian model could lead to vastly different estimates and affect the signifinance of the predictors. In the future, we could further explore in the Bayesian model prediction of new observations, hypothesis testing of multiple parameters, joint credible regions, choosing various types of distributions as priors (such as Jeffrey's prior), and transformations of our data to fix normality issues. 
 
 # References
 
 Note: These are not cited in proper format yet.
 
-<https://en.wikipedia.org/wiki/Bayesian_linear_regression>
+3. <https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18>
 
-<https://gregorygundersen.com/blog/2020/02/04/bayesian-linear-regression/>
+4. https://online.stat.psu.edu/stat857/node/155/
 
-<https://www.researchgate.net/publication/333917874_Bayesian_Linear_Regression#pf18>
+Introduction to Linear Regression Analysis, sixth edition, 2021. Douglas C.
+ Montgomery, Elizabeth A. Peck, G. Geoffrey Vining.
